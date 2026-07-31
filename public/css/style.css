@@ -324,3 +324,24 @@ body {
     color: #be123c !important;
     text-decoration: underline;
 }
+
+select.form-control {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    height: 48px; 
+    padding-right: 40px; 
+    cursor: pointer;
+    
+    
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+}
+
+
+select.form-control option {
+    background-color: #ffffff;
+    color: var(--text-color);
+    padding: 10px;
+}

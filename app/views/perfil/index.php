@@ -5,7 +5,7 @@
         <div class="auth-header">
             <div class="logo-icon">👤</div>
             <h2>Mi Perfil</h2>
-            <p class="subtitle">Gestiona tu información personal</p>
+            <p class="subtitle">Gestiona tu información personal y académica</p>
         </div>
 
         <?php if (!empty($data['mensaje'])): ?>
@@ -30,14 +30,30 @@
                 <input type="email" id="correo" class="form-control input-disabled" value="<?= htmlspecialchars($data['usuario']['correo'] ?? '') ?>" disabled readonly>
             </div>
 
+            
             <div class="form-group">
-                <label for="institucion">Universidad / Institución</label>
-                <input type="text" id="institucion" class="form-control input-disabled" value="<?= htmlspecialchars($data['usuario']['institucion'] ?? 'No especificada') ?>" disabled readonly>
+                <label for="institucion_id">Universidad / Institución</label>
+                <select name="institucion_id" id="institucion_id" class="form-control" required>
+                    <option value="">-- Selecciona una institución --</option>
+                    <?php foreach ($data['instituciones'] as $inst): ?>
+                        <option value="<?= $inst['id'] ?>" <?= ($data['usuario']['institucion_id'] == $inst['id']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($inst['nombre']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
 
+            
             <div class="form-group">
-                <label for="carrera">Carrera</label>
-                <input type="text" id="carrera" class="form-control input-disabled" value="<?= htmlspecialchars($data['usuario']['carrera'] ?? 'No especificada') ?>" disabled readonly>
+                <label for="carrera_id">Carrera</label>
+                <select name="carrera_id" id="carrera_id" class="form-control" required>
+                    <option value="">-- Selecciona una carrera --</option>
+                    <?php foreach ($data['carreras'] as $carrera): ?>
+                        <option value="<?= $carrera['id'] ?>" <?= ($data['usuario']['carrera_id'] == $carrera['id']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($carrera['nombre']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
 
             <button type="submit" class="btn-primary">Guardar Cambios</button>

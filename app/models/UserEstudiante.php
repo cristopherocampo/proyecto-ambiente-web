@@ -5,7 +5,7 @@ class UserEstudiante {
     private $db;
 
     public function __construct() {
-        // Conexión usando tu patrón Singleton con MySQLi
+        
         $this->db = Database::getInstance()->getConnection();
     }
 
@@ -26,7 +26,7 @@ class UserEstudiante {
         
         $stmt = $this->db->prepare($sql);
         
-        // Convertir a int si existen los IDs, o pasarlos apropiadamente
+        
         $instId = !empty($data['institucion_id']) ? (int)$data['institucion_id'] : null;
         $carreraId = !empty($data['carrera_id']) ? (int)$data['carrera_id'] : null;
 
@@ -43,21 +43,21 @@ class UserEstudiante {
         return $stmt->execute();
     }
 
-    // Obtener lista de instituciones para el select
+    
     public function getInstituciones() {
         $sql = "SELECT * FROM instituciones ORDER BY nombre ASC";
         $result = $this->db->query($sql);
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    // Obtener lista de carreras para el select
+    
     public function getCarreras() {
         $sql = "SELECT * FROM carreras ORDER BY nombre ASC";
         $result = $this->db->query($sql);
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    // Obtener perfil de estudiante por ID
+    
     public function getById($id) {
         $sql = "SELECT u.*, i.nombre as institucion, c.nombre as carrera 
                 FROM usuarios u
@@ -71,11 +71,18 @@ class UserEstudiante {
         return $result->fetch_assoc();
     }
 
-    // Actualizar datos del perfil
-    public function updatePerfil($id, $nombre, $apellidos) {
-        $sql = "UPDATE usuarios SET nombre = ?, apellidos = ? WHERE id = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("ssi", $nombre, $apellidos, $id);
-        return $stmt->execute();
+    
+    public function updatePerfil($id, $nombre, $apellidos, $institucion_id, $carrera_id) {
+    $sql = "UPDATE usuarios 
+            SET nombre = ?, apellidos = ?, institucion_id = ?, carrera_id = ? 
+            WHERE id = ?";
+            
+    $stmt = $this->db->prepare($sql);
+    
+    $instId = !empty($institucion_id) ? (int)$institucion_id : null;
+    $carreraId = !empty($carrera_id) ? (int)$carrera_id : null;
+
+    $stmt->bind_param("ssiii", $nombre, $apellidos, $instId, $carreraId, $id);
+    return $stmt->execute();
     }
 }

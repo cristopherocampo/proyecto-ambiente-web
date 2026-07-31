@@ -25,7 +25,7 @@
             </a>
             
             <span class="nav-user">
-                Hola, <strong><?= htmlspecialchars($_SESSION['user_nombre'] ?? $_SESSION['user_name'] ?? 'Estudiante') ?></strong>
+                😎 <strong><?= htmlspecialchars($_SESSION['user_nombre'] ?? $_SESSION['user_name'] ?? 'Estudiante') ?></strong>
             </span>
             
             <a href="<?= BASE_URL ?>/auth/logout" class="btn-nav btn-logout-nav">Cerrar Sesión</a>

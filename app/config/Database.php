@@ -6,7 +6,7 @@ class Database {
     private $conn;
 
     private function __construct() {
-        // Silenciamos los errores de conexión para manejarlos manualmente
+        
         mysqli_report(MYSQLI_REPORT_STRICT | MYSQLI_REPORT_ERROR);
         
         try {
@@ -28,6 +28,6 @@ class Database {
         return $this->conn;
     }
     
-    // Prevenir la clonación del objeto
+    
     private function __clone() {}
 }
