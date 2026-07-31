@@ -1,5 +1,5 @@
 <?php
-require_once '../app/core/Controller.php';
+require_once 'app/core/Controller.php';
 
 class RegistroController extends Controller {
 
@@ -14,7 +14,7 @@ class RegistroController extends Controller {
             $this->redirect('/user/index');
         }
 
-        $userModel = $this->model('User');
+        $userModel = $this->model('UserEstudiante');
         
         $data = [
             'instituciones' => $userModel->getInstituciones(),
@@ -33,7 +33,7 @@ class RegistroController extends Controller {
             $institucion_id = $_POST['institucion_id'] ?? null;
             $carrera_id     = $_POST['carrera_id'] ?? null;
 
-            $userModel = $this->model('User');
+            $userModel = $this->model('UserEstudiante');
 
             
             $data = [
