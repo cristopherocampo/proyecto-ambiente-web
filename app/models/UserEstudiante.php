@@ -85,4 +85,24 @@ class UserEstudiante {
     $stmt->bind_param("ssiii", $nombre, $apellidos, $instId, $carreraId, $id);
     return $stmt->execute();
     }
+
+    //VALIDACIONES
+
+    public function existeNombreCompleto($nombre, $apellidos, $excludeUserId = null) {
+    if ($excludeUserId) {
+        $sql = "SELECT id FROM usuarios WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?) AND id != ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("ssi", $nombre, $apellidos, $excludeUserId);
+    } else {
+        $sql = "SELECT id FROM usuarios WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("ss", $nombre, $apellidos);
+    }
+
+    $stmt->execute();
+    $resultado = $stmt->get_result();
+    return $resultado->num_rows > 0;
+    }
+
+    
 }

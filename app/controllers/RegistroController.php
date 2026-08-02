@@ -12,6 +12,7 @@ class RegistroController extends Controller {
     public function index() {
         if (isset($_SESSION['user_id'])) {
             $this->redirect('/user/index');
+            exit;
         }
 
         $userModel = $this->model('UserEstudiante');
@@ -35,23 +36,29 @@ class RegistroController extends Controller {
 
             $userModel = $this->model('UserEstudiante');
 
-            
             $data = [
                 'instituciones' => $userModel->getInstituciones(),
                 'carreras'      => $userModel->getCarreras()
             ];
 
-            // Validar que los campos no estan vacios
+            
             if (!empty($nombre) && !empty($apellidos) && !empty($email) && !empty($password)) {
                 
-                // Verificar si el correo ya está registrado
+                
                 if ($userModel->getByEmail($email)) {
                     $data['error'] = 'El correo ya se encuentra registrado.';
                     $this->view('auth/registro', $data);
                     return;
                 }
 
-               
+                
+                if ($userModel->existeNombreCompleto($nombre, $apellidos)) {
+                    $data['error'] = 'Ya existe una cuenta registrada con el mismo nombre y apellido.';
+                    $this->view('auth/registro', $data);
+                    return;
+                }
+
+                
                 $passwordHash = password_hash($password, PASSWORD_BCRYPT);
 
                 $registrado = $userModel->create([

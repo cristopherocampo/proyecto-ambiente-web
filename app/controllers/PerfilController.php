@@ -38,12 +38,25 @@ class PerfilController extends Controller {
             $apellidos      = trim($_POST['apellidos'] ?? '');
             $institucion_id = $_POST['institucion_id'] ?? '';
             $carrera_id     = $_POST['carrera_id'] ?? '';
+            $userId         = $_SESSION['user_id'];
 
             if (!empty($nombre) && !empty($apellidos)) {
+                
                 $userModel = $this->model('UserEstudiante');
+
+                
+                if ($userModel->existeNombreCompleto($nombre, $apellidos, $userId)) {
+                    $_SESSION['perfil_mensaje'] = [
+                        'tipo'  => 'error', 
+                        'texto' => 'No puedes cambiar a este nombre. Ya existe otro usuario registrado con el mismo nombre y apellido.'
+                    ];
+                    $this->redirect('/perfil/index');
+                    exit;
+                }
+
                 
                 $actualizado = $userModel->updatePerfil(
-                    $_SESSION['user_id'], 
+                    $userId, 
                     $nombre, 
                     $apellidos, 
                     $institucion_id, 
