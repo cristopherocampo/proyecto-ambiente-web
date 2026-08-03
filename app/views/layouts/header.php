@@ -18,11 +18,21 @@
         </div>
         
         <div class="nav-menu">
-            <a href="<?= BASE_URL ?>/home/index" class="btn-nav">Inicio</a>
+    <a href="<?= BASE_URL ?>/home/index" class="btn-nav">
+        Inicio
+    </a>
 
-            <a href="<?= BASE_URL ?>/perfil/index" class="btn-nav btn-primary-nav">
-                👤 Mi Perfil
-            </a>
+    <a href="<?= BASE_URL ?>/solicitud/index" class="btn-nav">
+        Solicitudes
+    </a>
+
+    <a href="<?= BASE_URL ?>/intercambio/index" class="btn-nav">
+        Intercambios
+    </a>
+
+    <a href="<?= BASE_URL ?>/perfil/index" class="btn-nav btn-primary-nav">
+        👤 Mi Perfil
+    </a>
             
             <span class="nav-user">
                 😎 <strong><?= htmlspecialchars($_SESSION['user_nombre'] ?? $_SESSION['user_name'] ?? 'Estudiante') ?></strong>
