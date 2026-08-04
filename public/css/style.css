@@ -557,3 +557,15 @@ select.form-control option {
     width: 100%;
     max-width: none;
 }
+
+#btn-iniciarSesion,
+#btn-Crearcuenta,
+.auth-form .btn-primary {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    padding: 14px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}

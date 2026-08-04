@@ -62,7 +62,7 @@
                 <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••">
             </div>
 
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" id="btn-Crearcuenta">
                 Crear cuenta ➔
             </button>
 
