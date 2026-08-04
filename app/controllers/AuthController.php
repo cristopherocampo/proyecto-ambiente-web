@@ -11,8 +11,8 @@ class AuthController extends Controller {
 
     public function index() {
         if (isset($_SESSION['user_id'])) {
-            $this->redirect('/user/index');
-        }
+    $this->redirect('/home/index');
+}
         
         $data = [];
         if (isset($_GET['exito'])) {
