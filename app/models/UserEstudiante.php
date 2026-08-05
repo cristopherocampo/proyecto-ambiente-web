@@ -1,108 +1,92 @@
 <?php
-require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . "/../config/Database.php";
 
-class UserEstudiante {
-    private $db;
-
-    public function __construct() {
-        
+class UserEstudiante
+{
+    private mysqli $db;
+    public function __construct()
+    {
         $this->db = Database::getInstance()->getConnection();
     }
 
-    // Buscar usuario por correo
-    public function getByEmail($email) {
-        $sql = "SELECT * FROM usuarios WHERE correo = ?";
-        $stmt = $this->db->prepare($sql);
+    public function getByEmail(string $email): ?array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM usuarios WHERE correo = ? LIMIT 1");
         $stmt->bind_param("s", $email);
         $stmt->execute();
-        $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        return $stmt->get_result()->fetch_assoc() ?: null;
     }
-
-    // Registrar nuevo usuario
-    public function create($data) {
-        $sql = "INSERT INTO usuarios (nombre, apellidos, correo, password, institucion_id, carrera_id) 
-                VALUES (?, ?, ?, ?, ?, ?)";
-        
-        $stmt = $this->db->prepare($sql);
-        
-        
-        $instId = !empty($data['institucion_id']) ? (int)$data['institucion_id'] : null;
-        $carreraId = !empty($data['carrera_id']) ? (int)$data['carrera_id'] : null;
-
-        $stmt->bind_param(
-            "ssssii", 
-            $data['nombre'], 
-            $data['apellidos'], 
-            $data['correo'], 
-            $data['password'], 
-            $instId, 
-            $carreraId
-        );
-
-        return $stmt->execute();
-    }
-
-    
-    public function getInstituciones() {
-        $sql = "SELECT * FROM instituciones ORDER BY nombre ASC";
-        $result = $this->db->query($sql);
-        return $result->fetch_all(MYSQLI_ASSOC);
-    }
-
-    
-    public function getCarreras() {
-        $sql = "SELECT * FROM carreras ORDER BY nombre ASC";
-        $result = $this->db->query($sql);
-        return $result->fetch_all(MYSQLI_ASSOC);
-    }
-
-    
-    public function getById($id) {
-        $sql = "SELECT u.*, i.nombre as institucion, c.nombre as carrera 
+    public function getById(int $id): ?array
+    {
+        $sql = "SELECT u.*, i.nombre AS institucion, c.nombre AS carrera
                 FROM usuarios u
-                LEFT JOIN instituciones i ON u.institucion_id = i.id
-                LEFT JOIN carreras c ON u.carrera_id = c.id
+                JOIN instituciones i ON i.id = u.institucion_id
+                LEFT JOIN carreras c ON c.id = u.carrera_id
                 WHERE u.id = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param("i", $id);
         $stmt->execute();
-        $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        return $stmt->get_result()->fetch_assoc() ?: null;
     }
-
-    
-    public function updatePerfil($id, $nombre, $apellidos, $institucion_id, $carrera_id) {
-    $sql = "UPDATE usuarios 
-            SET nombre = ?, apellidos = ?, institucion_id = ?, carrera_id = ? 
-            WHERE id = ?";
-            
-    $stmt = $this->db->prepare($sql);
-    
-    $instId = !empty($institucion_id) ? (int)$institucion_id : null;
-    $carreraId = !empty($carrera_id) ? (int)$carrera_id : null;
-
-    $stmt->bind_param("ssiii", $nombre, $apellidos, $instId, $carreraId, $id);
-    return $stmt->execute();
-    }
-
-    //VALIDACIONES
-
-    public function existeNombreCompleto($nombre, $apellidos, $excludeUserId = null) {
-    if ($excludeUserId) {
-        $sql = "SELECT id FROM usuarios WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?) AND id != ?";
+    public function create(array $d): bool
+    {
+        $estado = $this->scalar("SELECT id FROM estados_usuario WHERE nombre='ACTIVO' LIMIT 1");
+        $sql = "INSERT INTO usuarios (
+                    institucion_id, carrera_id, estado_usuario_id,
+                    nombre, apellidos, correo, password_hash
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("ssi", $nombre, $apellidos, $excludeUserId);
-    } else {
-        $sql = "SELECT id FROM usuarios WHERE LOWER(nombre) = LOWER(?) AND LOWER(apellidos) = LOWER(?)";
+        $stmt->bind_param(
+            "iiissss",
+            $d["institucion_id"],
+            $d["carrera_id"],
+            $estado,
+            $d["nombre"],
+            $d["apellidos"],
+            $d["correo"],
+            $d["password_hash"],
+        );
+        return $stmt->execute();
+    }
+    public function updatePerfil(
+        int $id,
+        string $nombre,
+        string $apellidos,
+        int $institucion,
+        int $carrera,
+    ): bool {
+        $stmt = $this->db->prepare(
+            "UPDATE usuarios SET nombre=?,apellidos=?,institucion_id=?,carrera_id=? WHERE id=?",
+        );
+        $stmt->bind_param("ssiii", $nombre, $apellidos, $institucion, $carrera, $id);
+        return $stmt->execute();
+    }
+    public function existeNombreCompleto(string $nombre, string $apellidos, ?int $exclude = null): bool
+    {
+        $sql =
+            "SELECT id FROM usuarios WHERE LOWER(nombre)=LOWER(?) AND LOWER(apellidos)=LOWER(?)" .
+            ($exclude ? " AND id<>?" : "");
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("ss", $nombre, $apellidos);
+        $exclude
+            ? $stmt->bind_param("ssi", $nombre, $apellidos, $exclude)
+            : $stmt->bind_param("ss", $nombre, $apellidos);
+        $stmt->execute();
+        return $stmt->get_result()->num_rows > 0;
     }
-
-    $stmt->execute();
-    $resultado = $stmt->get_result();
-    return $resultado->num_rows > 0;
+    public function getInstituciones(): array
+    {
+        return $this->rows("SELECT id,nombre FROM instituciones ORDER BY nombre");
     }
-
-    
+    public function getCarreras(): array
+    {
+        return $this->rows("SELECT id,institucion_id,nombre FROM carreras WHERE activo=1 ORDER BY nombre");
+    }
+    private function rows(string $sql): array
+    {
+        return $this->db->query($sql)->fetch_all(MYSQLI_ASSOC);
+    }
+    private function scalar(string $sql): int
+    {
+        return (int) $this->db->query($sql)->fetch_row()[0];
+    }
 }

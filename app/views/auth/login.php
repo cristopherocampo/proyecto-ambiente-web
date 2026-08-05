@@ -1,45 +1,40 @@
-<?php require_once 'app/views/layouts/header.php'; ?>
+<?php require __DIR__ . '/../layouts/header.php'; ?>
 
-<div class="login-wrapper">
-    <div class="glass-card login-card">
-        
-        <div class="auth-header">
-            <div class="logo-icon">📖</div>
-            <h2>Bienvenido de nuevo</h2>
-            <p class="subtitle">Dale una nueva historia a tus libros</p>
-        </div>
+<section class="auth-shell">
+    <div class="card auth-card">
+        <div class="logo">📖</div>
+        <h1>Bienvenido a BookCycle</h1>
+        <p class="muted">Dale una nueva historia a tus libros.</p>
 
-        <?php if (isset($data['exito'])): ?>
-            <div class="alert alert-success"><?= htmlspecialchars($data['exito']) ?></div>
+        <?php if (!empty($data['exito'])): ?>
+            <div class="alert success"><?= htmlspecialchars($data['exito']) ?></div>
         <?php endif; ?>
 
-        <?php if (isset($data['error'])): ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($data['error']) ?></div>
+        <?php if (!empty($data['error'])): ?>
+            <div class="alert error"><?= htmlspecialchars($data['error']) ?></div>
         <?php endif; ?>
 
-        <form action="<?= BASE_URL ?>/auth/login" method="POST">
-            <div class="form-group">
-                <label for="email">Correo electrónico</label>
-                <input type="email" id="email" name="email" class="form-control" required placeholder="ejemplo@universidad.edu">
-            </div>
+        <form method="post" action="<?= BASE_URL ?>/auth/login">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars($data['csrf']) ?>">
 
-            <div class="form-group">
-                <label for="password">Contraseña</label>
-                <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••">
-            </div>
+            <label>
+                Correo electrónico
+                <input type="email" name="email" required autocomplete="email">
+            </label>
 
-            <button type="submit" class="btn btn-primary" id="btn-iniciarSesion">
-                Iniciar sesión ➔
-            </button>
+            <label>
+                Contraseña
+                <input type="password" name="password" required autocomplete="current-password">
+            </label>
 
-            <div class="divider">o</div>
-
-            <div class="auth-footer">
-                <p>¿No tienes una cuenta? <a href="<?= BASE_URL ?>/registro/index">Regístrate gratis</a></p>
-            </div>
+            <button class="btn primary" type="submit">Iniciar sesión</button>
         </form>
 
+        <p class="center muted">
+            ¿No tienes cuenta?
+            <a href="<?= BASE_URL ?>/registro/index">Regístrate</a>
+        </p>
     </div>
-</div>
+</section>
 
-<?php require_once 'app/views/layouts/footer.php'; ?>
+<?php require __DIR__ . '/../layouts/footer.php'; ?>
