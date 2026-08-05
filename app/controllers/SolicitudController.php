@@ -16,6 +16,7 @@ class SolicitudController extends Controller {
         $this->solicitudModel = $this->model('Solicitud');
         $this->intercambioModel = $this->model('Intercambio');
     }
+
     public function index() {
         $this->view('solicitudes/index');
     }
@@ -66,10 +67,10 @@ class SolicitudController extends Controller {
             true
         );
 
-        $publicacion_id = $data['publicacion_id'] ?? '';
+        $publicacion_id = (int)($data['publicacion_id'] ?? 0);
         $mensaje = trim($data['mensaje'] ?? '');
 
-        if (empty($publicacion_id)) {
+        if ($publicacion_id <= 0) {
             echo json_encode([
                 'success' => false,
                 'message' => 'La publicación es requerida'
@@ -89,7 +90,10 @@ class SolicitudController extends Controller {
             return;
         }
 
-        if ((int)$publicacion['propietario_id'] === (int)$_SESSION['user_id']) {
+        if (
+            (int)$publicacion['propietario_id'] ===
+            (int)$_SESSION['user_id']
+        ) {
             echo json_encode([
                 'success' => false,
                 'message' => 'No puedes solicitar tu propia publicación'
@@ -124,24 +128,25 @@ class SolicitudController extends Controller {
             'mensaje' => $mensaje
         ]);
 
-        if ($solicitud_id) {
-            $this->solicitudModel->createHistorial([
-                'solicitud_id' => $solicitud_id,
-                'estado_solicitud_id' => 1,
-                'cambiado_por' => $_SESSION['user_id'],
-                'comentario' => 'Solicitud creada'
-            ]);
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Solicitud enviada exitosamente'
-            ]);
-        } else {
+        if (!$solicitud_id) {
             echo json_encode([
                 'success' => false,
                 'message' => 'Error al enviar la solicitud'
             ]);
+            return;
         }
+
+        $this->solicitudModel->createHistorial([
+            'solicitud_id' => $solicitud_id,
+            'estado_solicitud_id' => 1,
+            'cambiado_por_id' => $_SESSION['user_id'],
+            'comentario' => 'Solicitud creada'
+        ]);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Solicitud enviada exitosamente'
+        ]);
     }
 
     public function apiAceptar($id) {
@@ -157,7 +162,10 @@ class SolicitudController extends Controller {
             return;
         }
 
-        if ((int)$solicitud['propietario_id'] !== (int)$_SESSION['user_id']) {
+        if (
+            (int)$solicitud['propietario_id'] !==
+            (int)$_SESSION['user_id']
+        ) {
             echo json_encode([
                 'success' => false,
                 'message' => 'No tienes permiso para aceptar esta solicitud'
@@ -178,25 +186,39 @@ class SolicitudController extends Controller {
             2
         );
 
-       if ($result) {
-    $intercambio = $this->intercambioModel->getBySolicitud($id);
+        if (!$result) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al aceptar la solicitud'
+            ]);
+            return;
+        }
 
-    if (!$intercambio) {
-        $this->intercambioModel->create($id);
-    }
+        $intercambio = $this->intercambioModel->getBySolicitud($id);
 
-    $this->solicitudModel->createHistorial([
-        'solicitud_id' => $id,
-        'estado_solicitud_id' => 2,
-        'cambiado_por' => $_SESSION['user_id'],
-        'comentario' => 'Solicitud aceptada'
-    ]);
+        if (!$intercambio) {
+            $intercambio_id = $this->intercambioModel->create($id);
 
-    echo json_encode([
-        'success' => true,
-        'message' => 'Solicitud aceptada exitosamente'
-    ]);
-}
+            if (!$intercambio_id) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'La solicitud fue aceptada, pero no se pudo crear el intercambio'
+                ]);
+                return;
+            }
+        }
+
+        $this->solicitudModel->createHistorial([
+            'solicitud_id' => $id,
+            'estado_solicitud_id' => 2,
+            'cambiado_por_id' => $_SESSION['user_id'],
+            'comentario' => 'Solicitud aceptada'
+        ]);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Solicitud aceptada exitosamente'
+        ]);
     }
 
     public function apiRechazar($id) {
@@ -227,7 +249,10 @@ class SolicitudController extends Controller {
             return;
         }
 
-        if ((int)$solicitud['propietario_id'] !== (int)$_SESSION['user_id']) {
+        if (
+            (int)$solicitud['propietario_id'] !==
+            (int)$_SESSION['user_id']
+        ) {
             echo json_encode([
                 'success' => false,
                 'message' => 'No tienes permiso para rechazar esta solicitud'
@@ -249,24 +274,25 @@ class SolicitudController extends Controller {
             $motivo
         );
 
-        if ($result) {
-            $this->solicitudModel->createHistorial([
-                'solicitud_id' => $id,
-                'estado_solicitud_id' => 3,
-                'cambiado_por' => $_SESSION['user_id'],
-                'comentario' => $motivo
-            ]);
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Solicitud rechazada'
-            ]);
-        } else {
+        if (!$result) {
             echo json_encode([
                 'success' => false,
                 'message' => 'Error al rechazar la solicitud'
             ]);
+            return;
         }
+
+        $this->solicitudModel->createHistorial([
+            'solicitud_id' => $id,
+            'estado_solicitud_id' => 3,
+            'cambiado_por_id' => $_SESSION['user_id'],
+            'comentario' => $motivo
+        ]);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Solicitud rechazada'
+        ]);
     }
 
     public function apiCancelar($id) {
@@ -282,7 +308,10 @@ class SolicitudController extends Controller {
             return;
         }
 
-        if ((int)$solicitud['solicitante_id'] !== (int)$_SESSION['user_id']) {
+        if (
+            (int)$solicitud['solicitante_id'] !==
+            (int)$_SESSION['user_id']
+        ) {
             echo json_encode([
                 'success' => false,
                 'message' => 'No tienes permiso para cancelar esta solicitud'
@@ -303,23 +332,24 @@ class SolicitudController extends Controller {
             4
         );
 
-        if ($result) {
-            $this->solicitudModel->createHistorial([
-                'solicitud_id' => $id,
-                'estado_solicitud_id' => 4,
-                'cambiado_por' => $_SESSION['user_id'],
-                'comentario' => 'Solicitud cancelada'
-            ]);
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Solicitud cancelada exitosamente'
-            ]);
-        } else {
+        if (!$result) {
             echo json_encode([
                 'success' => false,
                 'message' => 'Error al cancelar la solicitud'
             ]);
+            return;
         }
+
+        $this->solicitudModel->createHistorial([
+            'solicitud_id' => $id,
+            'estado_solicitud_id' => 4,
+            'cambiado_por_id' => $_SESSION['user_id'],
+            'comentario' => 'Solicitud cancelada'
+        ]);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Solicitud cancelada exitosamente'
+        ]);
     }
 }

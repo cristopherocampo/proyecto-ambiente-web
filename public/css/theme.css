@@ -44,7 +44,7 @@ body {
     border: 1px solid transparent;
     transition: 0.2s;
 }
-.side-nav a:first-of-type,
+.side-nav a.active,
 .side-nav a:hover,
 .side-bottom a:hover {
     background: rgba(255, 255, 255, 0.09);

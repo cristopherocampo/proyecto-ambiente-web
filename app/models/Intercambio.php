@@ -9,7 +9,8 @@ class Intercambio {
     }
 
     public function getBySolicitud($solicitud_id) {
-        $query = "SELECT * FROM intercambios
+        $query = "SELECT *
+                  FROM intercambios
                   WHERE solicitud_id = ?";
 
         $stmt = $this->db->prepare($query);
@@ -22,12 +23,30 @@ class Intercambio {
     }
 
     public function create($solicitud_id) {
+        $codigo_entrega = strtoupper(
+            substr(
+                md5(uniqid('', true)),
+                0,
+                10
+            )
+        );
+
         $query = "INSERT INTO intercambios
-                  (solicitud_id, estado_intercambio_id)
-                  VALUES (?, 1)";
+                  (
+                      solicitud_id,
+                      estado_intercambio_id,
+                      codigo_entrega,
+                      fecha_acordada
+                  )
+                  VALUES (?, 1, ?, NOW())";
 
         $stmt = $this->db->prepare($query);
-        $stmt->bind_param("i", $solicitud_id);
+
+        $stmt->bind_param(
+            "is",
+            $solicitud_id,
+            $codigo_entrega
+        );
 
         if ($stmt->execute()) {
             return $this->db->insert_id;
@@ -39,12 +58,23 @@ class Intercambio {
     public function getByUsuario($usuario_id) {
         $query = "SELECT
                     intercambios.*,
+                    intercambios.fecha_acordada AS fecha_inicio,
                     estados_intercambio.nombre AS estado,
-                    solicitudes.publicacion_id,
+                    solicitudes.publicacion_solicitada_id AS publicacion_id,
                     solicitudes.solicitante_id,
                     publicaciones.propietario_id,
-                    publicaciones.titulo,
-                    publicaciones.autor,
+                    obras.titulo,
+                    (
+                        SELECT GROUP_CONCAT(
+                            autores.nombre
+                            ORDER BY obra_autores.orden_autoria
+                            SEPARATOR ', '
+                        )
+                        FROM obra_autores
+                        INNER JOIN autores
+                            ON obra_autores.autor_id = autores.id
+                        WHERE obra_autores.obra_id = obras.id
+                    ) AS autor,
                     CONCAT(
                         usuario_solicitante.nombre,
                         ' ',
@@ -62,7 +92,10 @@ class Intercambio {
                   INNER JOIN solicitudes
                     ON intercambios.solicitud_id = solicitudes.id
                   INNER JOIN publicaciones
-                    ON solicitudes.publicacion_id = publicaciones.id
+                    ON solicitudes.publicacion_solicitada_id =
+                       publicaciones.id
+                  INNER JOIN obras
+                    ON publicaciones.obra_id = obras.id
                   INNER JOIN usuarios AS usuario_solicitante
                     ON solicitudes.solicitante_id =
                        usuario_solicitante.id
@@ -74,11 +107,13 @@ class Intercambio {
                   ORDER BY intercambios.id DESC";
 
         $stmt = $this->db->prepare($query);
+
         $stmt->bind_param(
             "ii",
             $usuario_id,
             $usuario_id
         );
+
         $stmt->execute();
 
         $result = $stmt->get_result();
@@ -96,15 +131,19 @@ class Intercambio {
     public function getById($id) {
         $query = "SELECT
                     intercambios.*,
-                    solicitudes.publicacion_id,
+                    intercambios.fecha_acordada AS fecha_inicio,
+                    solicitudes.publicacion_solicitada_id AS publicacion_id,
                     solicitudes.solicitante_id,
                     publicaciones.propietario_id,
-                    publicaciones.titulo
+                    obras.titulo
                   FROM intercambios
                   INNER JOIN solicitudes
                     ON intercambios.solicitud_id = solicitudes.id
                   INNER JOIN publicaciones
-                    ON solicitudes.publicacion_id = publicaciones.id
+                    ON solicitudes.publicacion_solicitada_id =
+                       publicaciones.id
+                  INNER JOIN obras
+                    ON publicaciones.obra_id = obras.id
                   WHERE intercambios.id = ?";
 
         $stmt = $this->db->prepare($query);
@@ -118,9 +157,10 @@ class Intercambio {
 
     public function completar($id) {
         $query = "UPDATE intercambios
-                  SET estado_intercambio_id = 2,
+                  SET estado_intercambio_id = 4,
                       fecha_finalizacion = NOW()
-                  WHERE id = ?";
+                  WHERE id = ?
+                  AND estado_intercambio_id = 1";
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("i", $id);
@@ -130,7 +170,7 @@ class Intercambio {
 
     public function completarSolicitud($solicitud_id) {
         $query = "UPDATE solicitudes
-                  SET estado_solicitud_id = 5,
+                  SET estado_solicitud_id = 6,
                       fecha_respuesta = NOW()
                   WHERE id = ?";
 
@@ -142,7 +182,7 @@ class Intercambio {
 
     public function finalizarPublicacion($publicacion_id) {
         $query = "UPDATE publicaciones
-                  SET disponible = 0
+                  SET estado_publicacion_id = 4
                   WHERE id = ?";
 
         $stmt = $this->db->prepare($query);
