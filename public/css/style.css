@@ -1,107 +1,177 @@
-/* 
-   ESTILOS LOGIN Y REGISTRO
-   */
+/*
+   VARIABLES GENERALES
+*/
+
 :root {
-    --primary-color: #004D3A;        
-    --primary-hover: #003326;        
-    --accent-color: #4cd9a4;         
-    --bg-light: #f8fafc;            
-    --card-bg: #ffffff;              
-    --text-color: #1e293b;           
-    --text-muted: #64748b;          
-    --border-color: #e2e8f0;        
-    --input-bg: #f8fafc;             
+    --primary-color: #004d3a;
+    --primary-hover: #003326;
+    --accent-color: #4cd9a4;
+    --bg-light: #f8fafc;
+    --card-bg: #ffffff;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --input-bg: #f8fafc;
 }
+
+
+/*
+   ESTILOS GENERALES
+*/
 
 body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background-color: var(--bg-light);
-    color: var(--text-color);
     margin: 0;
     padding: 0;
+    background-color: var(--bg-light);
+    color: var(--text-color);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+
+/*
+   LOGIN Y REGISTRO
+*/
 
 .login-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 100px);
+    min-height: calc(100vh - 120px);
     padding: 20px;
 }
 
-
 .glass-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 40px;
+    box-sizing: border-box;
     background: var(--card-bg);
     border: 1px solid rgba(226, 232, 240, 0.8);
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    padding: 40px;
-    width: 100%;
-    max-width: 480px;
-    box-sizing: border-box;
 }
 
 .auth-header {
-    text-align: center;
     margin-bottom: 25px;
+    text-align: center;
 }
 
 .auth-header .logo-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
     width: 50px;
     height: 50px;
+    margin-bottom: 10px;
     background-color: #d1fae5;
     color: var(--primary-color);
     border-radius: 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     font-size: 24px;
-    margin-bottom: 10px;
 }
 
 .auth-header h2 {
+    margin: 5px 0;
     color: var(--primary-color);
     font-size: 1.6rem;
     font-weight: 700;
-    margin: 5px 0;
 }
 
 .auth-header .subtitle {
+    margin: 0;
     color: var(--text-muted);
     font-size: 0.9rem;
-    margin: 0;
 }
 
+.auth-footer {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.auth-footer a {
+    color: var(--primary-color);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 25px 0 15px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.divider:not(:empty)::before {
+    margin-right: 0.5em;
+}
+
+.divider:not(:empty)::after {
+    margin-left: 0.5em;
+}
+
+
+/*
+   FORMULARIOS
+*/
+
 .form-group {
-    margin-bottom: 16px;
     display: flex;
     flex-direction: column;
+    margin-bottom: 16px;
 }
 
 .form-group label {
+    margin-bottom: 6px;
+    color: var(--text-color);
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--text-color);
-    margin-bottom: 6px;
 }
 
 .form-control {
     width: 100%;
     padding: 12px 16px;
+    box-sizing: border-box;
     background-color: var(--input-bg);
+    color: var(--text-color);
     border: 1px solid var(--border-color);
     border-radius: 10px;
+    font-family: inherit;
     font-size: 0.95rem;
-    color: var(--text-color);
-    box-sizing: border-box;
-    transition: all 0.2s ease;
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .form-control:focus {
     outline: none;
-    border-color: var(--primary-color);
     background-color: #ffffff;
+    border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(0, 77, 58, 0.1);
 }
 
@@ -118,78 +188,128 @@ body {
     flex: 1;
 }
 
-.btn-primary {
-    width: 100%;
-    padding: 14px;
-    background-color: var(--primary-color);
-    color: #ffffff;
-    border: none;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: 600;
+select.form-control {
+    height: 48px;
+    padding-right: 40px;
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    display: flex;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+}
+
+select.form-control option {
+    padding: 10px;
+    background-color: #ffffff;
+    color: var(--text-color);
+}
+
+.input-disabled {
+    background-color: #f1f5f9 !important;
+    color: #64748b !important;
+    border-color: #cbd5e1 !important;
+    cursor: not-allowed;
+}
+
+
+/*
+   BOTONES GENERALES
+*/
+
+.btn {
+    display: inline-flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
-    margin-top: 10px;
+    width: auto;
+    padding: 10px 18px;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        transform 0.1s ease;
 }
 
-.btn-primary:hover {
-    background-color: var(--primary-hover);
-}
-
-.btn-primary:active {
+.btn:active {
     transform: scale(0.99);
 }
 
-.divider {
+.btn-primary {
+    background-color: #05624c;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: #044f3e;
+}
+
+.btn-secondary {
+    background-color: #64748b;
+    color: #ffffff;
+}
+
+.btn-secondary:hover {
+    background-color: #475569;
+}
+
+.btn-danger {
+    background-color: #dc2626;
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.btn-sm {
+    padding: 7px 12px;
+    font-size: 12px;
+}
+
+.btn-block {
     display: flex;
+    width: 100%;
+}
+
+
+/*
+   BOTONES DE AUTENTICACIÓN
+*/
+
+#btn-iniciarSesion,
+#btn-Crearcuenta,
+.auth-form .btn-primary {
+    display: flex !important;
+    justify-content: center;
     align-items: center;
-    text-align: center;
-    margin: 25px 0 15px 0;
-    color: var(--text-muted);
-    font-size: 0.8rem;
+    width: 100% !important;
+    margin-top: 10px;
+    padding: 14px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    font-size: 1rem;
 }
 
-.divider::before,
-.divider::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid var(--border-color);
-}
 
-.divider:not(:empty)::before {
-    margin-right: .5em;
-}
-
-.divider:not(:empty)::after {
-    margin-left: .5em;
-}
-
-.auth-footer {
-    text-align: center;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-}
-
-.auth-footer a {
-    color: var(--primary-color);
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.auth-footer a:hover {
-    text-decoration: underline;
-}
-
+/*
+   ALERTAS
+*/
 
 .alert {
+    margin-bottom: 20px;
     padding: 12px 16px;
     border-radius: 8px;
     font-size: 0.9rem;
-    margin-bottom: 20px;
     text-align: center;
 }
 
@@ -205,28 +325,31 @@ body {
     border: 1px solid #bbf7d0;
 }
 
-/* ESTILOS HEADER */
+
+/*
+   HEADER ANTERIOR
+*/
 
 .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px 30px;
-    background: rgba(0, 77, 64, 0.95); 
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    background: rgba(0, 77, 64, 0.95);
     color: #ffffff;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
 }
 
 .nav-brand a {
+    color: #ffffff !important;
     font-size: 1.4rem;
     font-weight: bold;
-    color: #ffffff !important;
-    text-decoration: none;
     letter-spacing: 0.5px;
+    text-decoration: none;
 }
 
 .nav-menu {
@@ -236,9 +359,9 @@ body {
 }
 
 .nav-user {
-    font-size: 0.95rem;
-    color: #e0f2f1;
     margin: 0 5px;
+    color: #e0f2f1;
+    font-size: 0.95rem;
 }
 
 .nav-user strong {
@@ -246,14 +369,13 @@ body {
     text-transform: capitalize;
 }
 
-
 .btn-nav {
-    text-decoration: none;
+    padding: 8px 16px;
     color: #e0f2f1;
+    border-radius: 6px;
     font-size: 0.9rem;
     font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 6px;
+    text-decoration: none;
     transition: all 0.3s ease;
 }
 
@@ -264,8 +386,8 @@ body {
 
 .btn-primary-nav {
     background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
     color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .btn-primary-nav:hover {
@@ -289,34 +411,20 @@ body {
 }
 
 
-
-/* PERFIL */
-
-.login-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 120px);
-    padding: 20px;
-}
+/*
+   PERFIL
+*/
 
 .profile-card {
     max-width: 520px;
     margin: 0 auto;
 }
 
-.input-disabled {
-    background-color: #f1f5f9 !important;
-    color: #64748b !important;
-    cursor: not-allowed;
-    border-color: #cbd5e1 !important;
-}
-
 .btn-logout {
     color: #e11d48 !important;
-    text-decoration: none;
-    font-weight: 600;
     font-size: 0.9em;
+    font-weight: 600;
+    text-decoration: none;
     transition: color 0.2s ease;
 }
 
@@ -325,30 +433,10 @@ body {
     text-decoration: underline;
 }
 
-select.form-control {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    height: 48px; 
-    padding-right: 40px; 
-    cursor: pointer;
-    
-    
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    background-size: 16px;
-}
 
-
-select.form-control option {
-    background-color: #ffffff;
-    color: var(--text-color);
-    padding: 10px;
-}
-
-.hidden {
-    display: none !important;
-}
+/*
+   SOLICITUDES
+*/
 
 .solicitudes-tabs {
     display: flex;
@@ -358,6 +446,7 @@ select.form-control option {
 
 .solicitudes-tabs .btn {
     width: auto;
+    margin: 0;
 }
 
 .solicitudes-seccion {
@@ -369,14 +458,21 @@ select.form-control option {
     max-width: none;
 }
 
+
+/*
+   TABLAS
+*/
+
 .table-responsive {
     width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: auto;
     text-align: left;
 }
 
@@ -391,100 +487,75 @@ select.form-control option {
     background-color: #f3f7f5;
     color: #1f2937;
     font-size: 14px;
+    font-weight: 700;
 }
 
 .table tbody tr:hover {
     background-color: #f8faf9;
 }
 
-.text-center {
-    text-align: center;
-}
+/*
+   Mantiene la fecha en una sola línea.
+*/
 
-.text-muted {
-    color: #64748b;
-}
-
-.table td.actions {
+.table th:nth-last-child(2),
+.table td:nth-last-child(2) {
     white-space: nowrap;
-    vertical-align: middle;
-    text-align: center;
 }
 
-.table td.actions .btn {
-    margin: 2px 4px;
-}
+/*
+   Columna de acciones.
+
+   display: table-cell anula el display:flex de la clase
+   general .actions que se encuentra en base.css.
+*/
 
 .table th:last-child,
 .table td:last-child {
-    width: 150px;
+    width: 190px;
+    min-width: 190px;
     text-align: center;
 }
 
-.btn {
-    display: inline-block;
-    width: auto;
-    padding: 10px 18px;
-    border: none;
-    border-radius: 6px;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
+.table td.actions {
+    display: table-cell;
+    padding-right: 8px;
+    padding-left: 8px;
     text-align: center;
-    text-decoration: none;
-    cursor: pointer;
+    vertical-align: middle;
+    white-space: nowrap;
 }
 
-.btn-primary {
-    background-color: #05624c;
-    color: white;
+.table td.actions .btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 78px;
+    margin: 2px;
+    vertical-align: middle;
 }
 
-.btn-primary:hover {
-    background-color: #044f3e;
-}
 
-.btn-secondary {
-    background-color: #64748b;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background-color: #475569;
-}
-
-.btn-danger {
-    background-color: #dc2626;
-    color: white;
-}
-
-.btn-danger:hover {
-    background-color: #b91c1c;
-}
-
-.btn-sm {
-    padding: 7px 12px;
-    font-size: 12px;
-}
-
-.btn-block {
-    display: block;
-    width: 100%;
-}
+/*
+   MODAL
+*/
 
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     visibility: hidden;
     opacity: 0;
-    z-index: 1000;
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease;
 }
 
 .modal-overlay.active {
@@ -493,10 +564,11 @@ select.form-control option {
 }
 
 .modal-content {
-    background-color: white;
     width: 90%;
     max-width: 500px;
     padding: 25px;
+    box-sizing: border-box;
+    background-color: #ffffff;
     border-radius: 12px;
 }
 
@@ -508,11 +580,18 @@ select.form-control option {
 }
 
 .modal-close {
+    padding: 0;
     background: none;
     border: none;
     font-size: 26px;
+    line-height: 1;
     cursor: pointer;
 }
+
+
+/*
+   LOADER
+*/
 
 .loader-container {
     display: flex;
@@ -536,7 +615,27 @@ select.form-control option {
     }
 }
 
+
+/*
+   INTERCAMBIOS
+*/
+
+.intercambios-card {
+    width: 100%;
+    max-width: none;
+}
+
+
+/*
+   RESPONSIVE
+*/
+
 @media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
     .solicitudes-tabs {
         flex-direction: column;
     }
@@ -545,27 +644,31 @@ select.form-control option {
         width: 100%;
     }
 
+    .table {
+        min-width: 900px;
+    }
+
     .table th,
     .table td {
         padding: 10px;
         font-size: 13px;
     }
-}
 
+    .table th:last-child,
+    .table td:last-child {
+        width: 180px;
+        min-width: 180px;
+    }
 
-.intercambios-card {
-    width: 100%;
-    max-width: none;
-}
+    .glass-card {
+        padding: 25px;
+    }
 
-#btn-iniciarSesion,
-#btn-Crearcuenta,
-.auth-form .btn-primary {
-    width: 100% !important;
-    display: flex !important;
-    justify-content: center;
-    align-items: center;
-    padding: 14px;
-    font-size: 1rem;
-    box-sizing: border-box;
+    .navbar {
+        padding: 12px 18px;
+    }
+
+    .nav-menu {
+        gap: 8px;
+    }
 }

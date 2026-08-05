@@ -130,7 +130,7 @@ class Publicacion
         $sql =
             $this->baseSelect() .
             ($where ? " WHERE " . implode(" AND ", $where) : "") .
-            $this->groupBy() .
+            " " . $this->groupBy() .
             " ORDER BY p.fecha_publicacion DESC LIMIT ? OFFSET ?";
         $types .= "ii";
         $args[] = $limit;
@@ -139,7 +139,11 @@ class Publicacion
     }
     public function find(int $id): ?array
     {
-        $rows = $this->preparedRows($this->baseSelect() . " WHERE p.id=?" . $this->groupBy(), "i", [$id]);
+                $rows = $this->preparedRows(
+            $this->baseSelect() . " WHERE p.id=? " . $this->groupBy(),
+            "i",
+            [$id]
+        );
         return $rows[0] ?? null;
     }
     public function catalogs(): array

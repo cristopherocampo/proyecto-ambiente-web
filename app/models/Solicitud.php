@@ -9,7 +9,18 @@ class Solicitud {
     }
 
     public function getPublicacionById($id) {
-        $query = "SELECT * FROM publicaciones WHERE id = ?";
+        $query = "SELECT
+                    p.*,
+                    o.titulo,
+                    o.descripcion,
+                    CASE
+                        WHEN p.estado_publicacion_id = 2 THEN 1
+                        ELSE 0
+                    END AS disponible
+                  FROM publicaciones AS p
+                  INNER JOIN obras AS o
+                    ON p.obra_id = o.id
+                  WHERE p.id = ?";
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("i", $id);
@@ -21,18 +32,37 @@ class Solicitud {
     }
 
     public function getById($id) {
-        $query = "SELECT 
+        $query = "SELECT
                     solicitudes.*,
-                    publicaciones.titulo,
-                    publicaciones.autor,
+                    solicitudes.publicacion_solicitada_id AS publicacion_id,
+                    o.titulo,
+                    (
+                        SELECT GROUP_CONCAT(
+                            autores.nombre
+                            ORDER BY obra_autores.orden_autoria
+                            SEPARATOR ', '
+                        )
+                        FROM obra_autores
+                        INNER JOIN autores
+                            ON obra_autores.autor_id = autores.id
+                        WHERE obra_autores.obra_id = o.id
+                    ) AS autor,
                     publicaciones.propietario_id,
-                    publicaciones.disponible,
+                    publicaciones.estado_publicacion_id,
+                    publicaciones.modalidad_id,
+                    publicaciones.valor_creditos,
+                    CASE
+                        WHEN publicaciones.estado_publicacion_id = 2 THEN 1
+                        ELSE 0
+                    END AS disponible,
                     estados_solicitud.nombre AS estado,
                     usuarios.nombre AS solicitante_nombre,
                     usuarios.apellidos AS solicitante_apellidos
                   FROM solicitudes
                   INNER JOIN publicaciones
-                    ON solicitudes.publicacion_id = publicaciones.id
+                    ON solicitudes.publicacion_solicitada_id = publicaciones.id
+                  INNER JOIN obras AS o
+                    ON publicaciones.obra_id = o.id
                   INNER JOIN estados_solicitud
                     ON solicitudes.estado_solicitud_id = estados_solicitud.id
                   INNER JOIN usuarios
@@ -51,14 +81,27 @@ class Solicitud {
     public function getEnviadas($usuario_id) {
         $query = "SELECT
                     solicitudes.*,
-                    publicaciones.titulo,
-                    publicaciones.autor,
+                    solicitudes.publicacion_solicitada_id AS publicacion_id,
+                    o.titulo,
+                    (
+                        SELECT GROUP_CONCAT(
+                            autores.nombre
+                            ORDER BY obra_autores.orden_autoria
+                            SEPARATOR ', '
+                        )
+                        FROM obra_autores
+                        INNER JOIN autores
+                            ON obra_autores.autor_id = autores.id
+                        WHERE obra_autores.obra_id = o.id
+                    ) AS autor,
                     estados_solicitud.nombre AS estado,
                     usuarios.nombre AS propietario_nombre,
                     usuarios.apellidos AS propietario_apellidos
                   FROM solicitudes
                   INNER JOIN publicaciones
-                    ON solicitudes.publicacion_id = publicaciones.id
+                    ON solicitudes.publicacion_solicitada_id = publicaciones.id
+                  INNER JOIN obras AS o
+                    ON publicaciones.obra_id = o.id
                   INNER JOIN estados_solicitud
                     ON solicitudes.estado_solicitud_id = estados_solicitud.id
                   INNER JOIN usuarios
@@ -85,14 +128,27 @@ class Solicitud {
     public function getRecibidas($usuario_id) {
         $query = "SELECT
                     solicitudes.*,
-                    publicaciones.titulo,
-                    publicaciones.autor,
+                    solicitudes.publicacion_solicitada_id AS publicacion_id,
+                    o.titulo,
+                    (
+                        SELECT GROUP_CONCAT(
+                            autores.nombre
+                            ORDER BY obra_autores.orden_autoria
+                            SEPARATOR ', '
+                        )
+                        FROM obra_autores
+                        INNER JOIN autores
+                            ON obra_autores.autor_id = autores.id
+                        WHERE obra_autores.obra_id = o.id
+                    ) AS autor,
                     estados_solicitud.nombre AS estado,
                     usuarios.nombre AS solicitante_nombre,
                     usuarios.apellidos AS solicitante_apellidos
                   FROM solicitudes
                   INNER JOIN publicaciones
-                    ON solicitudes.publicacion_id = publicaciones.id
+                    ON solicitudes.publicacion_solicitada_id = publicaciones.id
+                  INNER JOIN obras AS o
+                    ON publicaciones.obra_id = o.id
                   INNER JOIN estados_solicitud
                     ON solicitudes.estado_solicitud_id = estados_solicitud.id
                   INNER JOIN usuarios
@@ -117,8 +173,9 @@ class Solicitud {
     }
 
     public function existePendiente($publicacion_id, $solicitante_id) {
-        $query = "SELECT * FROM solicitudes
-                  WHERE publicacion_id = ?
+        $query = "SELECT id
+                  FROM solicitudes
+                  WHERE publicacion_solicitada_id = ?
                   AND solicitante_id = ?
                   AND estado_solicitud_id = 1";
 
@@ -128,6 +185,7 @@ class Solicitud {
             $publicacion_id,
             $solicitante_id
         );
+
         $stmt->execute();
 
         $result = $stmt->get_result();
@@ -137,19 +195,38 @@ class Solicitud {
 
     public function create($data) {
         $query = "INSERT INTO solicitudes
-                  (publicacion_id, solicitante_id, estado_solicitud_id, mensaje)
-                  VALUES (?, ?, 1, ?)";
+                  (
+                      publicacion_solicitada_id,
+                      solicitante_id,
+                      modalidad_id,
+                      estado_solicitud_id,
+                      creditos_ofrecidos,
+                      mensaje
+                  )
+                  SELECT
+                      publicaciones.id,
+                      ?,
+                      publicaciones.modalidad_id,
+                      1,
+                      CASE
+                          WHEN publicaciones.modalidad_id IN (2, 3)
+                              THEN COALESCE(publicaciones.valor_creditos, 0)
+                          ELSE NULL
+                      END,
+                      ?
+                  FROM publicaciones
+                  WHERE publicaciones.id = ?";
 
         $stmt = $this->db->prepare($query);
 
         $stmt->bind_param(
-            "iis",
-            $data['publicacion_id'],
+            "isi",
             $data['solicitante_id'],
-            $data['mensaje']
+            $data['mensaje'],
+            $data['publicacion_id']
         );
 
-        if ($stmt->execute()) {
+        if ($stmt->execute() && $stmt->affected_rows === 1) {
             return $this->db->insert_id;
         }
 
@@ -176,8 +253,18 @@ class Solicitud {
     }
 
     public function createHistorial($data) {
+        $cambiado_por_id =
+            $data['cambiado_por_id']
+            ?? $data['cambiado_por']
+            ?? null;
+
         $query = "INSERT INTO historial_estados_solicitud
-                  (solicitud_id, estado_solicitud_id, cambiado_por, comentario)
+                  (
+                      solicitud_id,
+                      estado_solicitud_id,
+                      cambiado_por_id,
+                      comentario
+                  )
                   VALUES (?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($query);
@@ -186,7 +273,7 @@ class Solicitud {
             "iiis",
             $data['solicitud_id'],
             $data['estado_solicitud_id'],
-            $data['cambiado_por'],
+            $cambiado_por_id,
             $data['comentario']
         );
 

@@ -82,26 +82,27 @@ class IntercambioController extends Controller {
             );
 
         if (
-            $intercambioCompletado &&
-            $solicitudCompletada &&
-            $publicacionFinalizada
+            !$intercambioCompletado ||
+            !$solicitudCompletada ||
+            !$publicacionFinalizada
         ) {
-            $this->solicitudModel->createHistorial([
-                'solicitud_id' => $intercambio['solicitud_id'],
-                'estado_solicitud_id' => 5,
-                'cambiado_por' => $_SESSION['user_id'],
-                'comentario' => 'Intercambio completado'
-            ]);
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Intercambio completado exitosamente'
-            ]);
-        } else {
             echo json_encode([
                 'success' => false,
                 'message' => 'Error al completar el intercambio'
             ]);
+            return;
         }
+
+        $this->solicitudModel->createHistorial([
+            'solicitud_id' => $intercambio['solicitud_id'],
+            'estado_solicitud_id' => 6,
+            'cambiado_por_id' => $_SESSION['user_id'],
+            'comentario' => 'Intercambio completado'
+        ]);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Intercambio completado exitosamente'
+        ]);
     }
 }

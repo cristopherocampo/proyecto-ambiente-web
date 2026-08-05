@@ -70,7 +70,7 @@
     font-size: 13px;
     font-weight: 650;
 }
-.side-nav a:first-of-type,
+.side-nav a.active,
 .side-nav a:hover,
 .side-bottom a:hover {
     background: #e7f1ed;
