@@ -1,50 +1,47 @@
 <?php
-require_once 'app/core/Controller.php';
-
-class AuthController extends Controller {
-
-    public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+class AuthController extends Controller
+{
+    public function __construct()
+    {
+        parent::__construct();
     }
-
-    public function index() {
-        if (isset($_SESSION['user_id'])) {
-    $this->redirect('/home/index');
-}
-        
-        $data = [];
-        if (isset($_GET['exito'])) {
-            $data['exito'] = '¡Registro exitoso! Ya puedes iniciar sesión.';
+    public function index(): void
+    {
+        if (!empty($_SESSION["user_id"])) {
+            $this->redirect("/catalogo/index");
         }
-
-        $this->view('auth/login', $data);
+        $this->view("auth/login", [
+            "exito" => isset($_GET["exito"]) ? "¡Registro exitoso! Ya puedes iniciar sesión." : null,
+            "csrf" => $this->csrfToken(),
+        ]);
     }
-
-    public function login() {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $email = trim($_POST['email'] ?? '');
-            $password = $_POST['password'] ?? '';
-
-            $userModel = $this->model('UserEstudiante');
-            $user = $userModel->getByEmail($email);
-
-            if ($user && password_verify($password, $user['password'])) {
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['user_name'] = $user['nombre'];
-                
-                $this->redirect('/home/index');
-            } else {
-                $this->view('auth/login', ['error' => 'Correo o contraseña incorrectos']);
-            }
-        } else {
-            $this->redirect('/auth/index');
+    public function login(): void
+    {
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+            $this->redirect("/auth/index");
         }
+        $this->verifyCsrf();
+        $email = filter_var(trim($_POST["email"] ?? ""), FILTER_VALIDATE_EMAIL);
+        $user = $email ? $this->model("UserEstudiante")->getByEmail($email) : null;
+        if (
+            $user &&
+            (int) $user["estado_usuario_id"] === 2 &&
+            password_verify($_POST["password"] ?? "", $user["password_hash"])
+        ) {
+            session_regenerate_id(true);
+            $_SESSION["user_id"] = (int) $user["id"];
+            $_SESSION["user_nombre"] = $user["nombre"];
+            $this->redirect("/catalogo/index");
+        }
+        $this->view("auth/login", [
+            "error" => "Correo o contraseña incorrectos.",
+            "csrf" => $this->csrfToken(),
+        ]);
     }
-
-    public function logout() {
+    public function logout(): void
+    {
+        $_SESSION = [];
         session_destroy();
-        $this->redirect('/auth/index');
+        $this->redirect("/auth/index");
     }
 }

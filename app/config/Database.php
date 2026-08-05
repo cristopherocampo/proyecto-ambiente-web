@@ -1,33 +1,35 @@
 <?php
-require_once 'config.php';
+require_once __DIR__ . "/config.php";
 
-class Database {
+class Database
+{
     private static $instance = null;
-    private $conn;
+    private mysqli $conn;
 
-    private function __construct() {
-        
+    private function __construct()
+    {
         mysqli_report(MYSQLI_REPORT_STRICT | MYSQLI_REPORT_ERROR);
-        
         try {
             $this->conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-            $this->conn->set_charset("utf8");
+            $this->conn->set_charset("utf8mb4");
         } catch (mysqli_sql_exception $e) {
-            die("Error de conexión a la base de datos. Por favor, verifica que MySQL esté encendido y la base de datos '" . DB_NAME . "' exista. Detalle: " . $e->getMessage());
+            error_log("BookCycle DB: " . $e->getMessage());
+            http_response_code(500);
+            exit("No fue posible conectar con la base de datos.");
         }
     }
 
-    public static function getInstance() {
+    public static function getInstance(): self
+    {
         if (!self::$instance) {
-            self::$instance = new Database();
+            self::$instance = new self();
         }
         return self::$instance;
     }
 
-    public function getConnection() {
+    public function getConnection(): mysqli
+    {
         return $this->conn;
     }
-    
-    
     private function __clone() {}
 }

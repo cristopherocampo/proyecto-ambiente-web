@@ -1,79 +1,43 @@
 <?php
-class PerfilController extends Controller {
-
-    public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        if (!isset($_SESSION['user_id'])) {
-            $this->redirect('/auth/index');
-            exit;
-        }
+class PerfilController extends Controller
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->requireAuth();
     }
-
-    public function index() {
-        $userModel = $this->model('UserEstudiante');
-        
-        $usuario = $userModel->getById($_SESSION['user_id']);
-        $instituciones = $userModel->getInstituciones();
-        $carreras = $userModel->getCarreras();
-
-        $data = [
-            'titulo'        => 'Mi Perfil - BookCycle',
-            'usuario'       => $usuario,
-            'instituciones' => $instituciones,
-            'carreras'      => $carreras,
-            'mensaje'       => $_SESSION['perfil_mensaje'] ?? null
-        ];
-
-        unset($_SESSION['perfil_mensaje']);
-
-        $this->view('perfil/index', $data);
+    public function index(): void
+    {
+        $m = $this->model("UserEstudiante");
+        $this->view("perfil/index", [
+            "usuario" => $m->getById((int) $_SESSION["user_id"]),
+            "instituciones" => $m->getInstituciones(),
+            "carreras" => $m->getCarreras(),
+            "flash" => $_SESSION["flash"] ?? null,
+            "csrf" => $this->csrfToken(),
+        ]);
+        unset($_SESSION["flash"]);
     }
-
-    public function actualizar() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $nombre         = trim($_POST['nombre'] ?? '');
-            $apellidos      = trim($_POST['apellidos'] ?? '');
-            $institucion_id = $_POST['institucion_id'] ?? '';
-            $carrera_id     = $_POST['carrera_id'] ?? '';
-            $userId         = $_SESSION['user_id'];
-
-            if (!empty($nombre) && !empty($apellidos)) {
-                
-                $userModel = $this->model('UserEstudiante');
-
-                
-                if ($userModel->existeNombreCompleto($nombre, $apellidos, $userId)) {
-                    $_SESSION['perfil_mensaje'] = [
-                        'tipo'  => 'error', 
-                        'texto' => 'No puedes cambiar a este nombre. Ya existe otro usuario registrado con el mismo nombre y apellido.'
-                    ];
-                    $this->redirect('/perfil/index');
-                    exit;
-                }
-
-                
-                $actualizado = $userModel->updatePerfil(
-                    $userId, 
-                    $nombre, 
-                    $apellidos, 
-                    $institucion_id, 
-                    $carrera_id
-                );
-
-                if ($actualizado) {
-                    $_SESSION['user_nombre'] = $nombre;
-                    $_SESSION['perfil_mensaje'] = ['tipo' => 'exito', 'texto' => '¡Perfil e información académica actualizados con éxito!'];
-                } else {
-                    $_SESSION['perfil_mensaje'] = ['tipo' => 'error', 'texto' => 'Error al actualizar los datos.'];
-                }
-            } else {
-                $_SESSION['perfil_mensaje'] = ['tipo' => 'error', 'texto' => 'Por favor, completa los campos requeridos.'];
-            }
+    public function actualizar(): void
+    {
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+            $this->redirect("/perfil/index");
         }
-
-        $this->redirect('/perfil/index');
+        $this->verifyCsrf();
+        $n = trim($_POST["nombre"] ?? "");
+        $a = trim($_POST["apellidos"] ?? "");
+        $i = (int) ($_POST["institucion_id"] ?? 0);
+        $c = (int) ($_POST["carrera_id"] ?? 0);
+        $m = $this->model("UserEstudiante");
+        if (!$n || !$a || !$i || !$c) {
+            $this->flash("error", "Completa todos los campos.");
+        } elseif ($m->existeNombreCompleto($n, $a, (int) $_SESSION["user_id"])) {
+            $this->flash("error", "Ese nombre ya pertenece a otro usuario.");
+        } else {
+            $m->updatePerfil((int) $_SESSION["user_id"], $n, $a, $i, $c);
+            $_SESSION["user_nombre"] = $n;
+            $this->flash("success", "Perfil actualizado correctamente.");
+        }
+        $this->redirect("/perfil/index");
     }
 }

@@ -1,87 +1,62 @@
 <?php
-require_once 'app/core/Controller.php';
-
-class RegistroController extends Controller {
-
-    public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+class RegistroController extends Controller
+{
+    public function __construct()
+    {
+        parent::__construct();
     }
-
-    public function index() {
-        if (isset($_SESSION['user_id'])) {
-            $this->redirect('/user/index');
-            exit;
+    public function index(): void
+    {
+        if (!empty($_SESSION["user_id"])) {
+            $this->redirect("/catalogo/index");
         }
-
-        $userModel = $this->model('UserEstudiante');
-        
+        $m = $this->model("UserEstudiante");
+        $this->view("auth/registro", [
+            "instituciones" => $m->getInstituciones(),
+            "carreras" => $m->getCarreras(),
+            "csrf" => $this->csrfToken(),
+        ]);
+    }
+    public function registrar(): void
+    {
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+            $this->redirect("/registro/index");
+        }
+        $this->verifyCsrf();
+        $m = $this->model("UserEstudiante");
         $data = [
-            'instituciones' => $userModel->getInstituciones(),
-            'carreras'      => $userModel->getCarreras()
+            "instituciones" => $m->getInstituciones(),
+            "carreras" => $m->getCarreras(),
+            "csrf" => $this->csrfToken(),
         ];
-
-        $this->view('auth/registro', $data);
-    }
-
-    public function registrar() {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $nombre         = trim($_POST['nombre'] ?? '');
-            $apellidos      = trim($_POST['apellidos'] ?? '');
-            $email          = trim($_POST['email'] ?? '');
-            $password       = $_POST['password'] ?? '';
-            $institucion_id = $_POST['institucion_id'] ?? null;
-            $carrera_id     = $_POST['carrera_id'] ?? null;
-
-            $userModel = $this->model('UserEstudiante');
-
-            $data = [
-                'instituciones' => $userModel->getInstituciones(),
-                'carreras'      => $userModel->getCarreras()
-            ];
-
-            
-            if (!empty($nombre) && !empty($apellidos) && !empty($email) && !empty($password)) {
-                
-                
-                if ($userModel->getByEmail($email)) {
-                    $data['error'] = 'El correo ya se encuentra registrado.';
-                    $this->view('auth/registro', $data);
-                    return;
-                }
-
-                
-                if ($userModel->existeNombreCompleto($nombre, $apellidos)) {
-                    $data['error'] = 'Ya existe una cuenta registrada con el mismo nombre y apellido.';
-                    $this->view('auth/registro', $data);
-                    return;
-                }
-
-                
-                $passwordHash = password_hash($password, PASSWORD_BCRYPT);
-
-                $registrado = $userModel->create([
-                    'nombre'         => $nombre,
-                    'apellidos'      => $apellidos,
-                    'correo'         => $email,
-                    'password'       => $passwordHash,
-                    'institucion_id' => $institucion_id,
-                    'carrera_id'     => $carrera_id
-                ]);
-
-                if ($registrado) {
-                    $this->redirect('/auth/index?exito=1');
-                } else {
-                    $data['error'] = 'Ocurrió un error al registrar el usuario.';
-                    $this->view('auth/registro', $data);
-                }
-            } else {
-                $data['error'] = 'Por favor completa todos los campos requeridos.';
-                $this->view('auth/registro', $data);
-            }
+        $nombre = trim($_POST["nombre"] ?? "");
+        $apellidos = trim($_POST["apellidos"] ?? "");
+        $correo = filter_var(trim($_POST["email"] ?? ""), FILTER_VALIDATE_EMAIL);
+        $password = $_POST["password"] ?? "";
+        $inst = (int) ($_POST["institucion_id"] ?? 0);
+        $carrera = (int) ($_POST["carrera_id"] ?? 0);
+        if ($nombre === "" || $apellidos === "" || !$correo || strlen($password) < 8 || !$inst || !$carrera) {
+            $data["error"] = "Completa todos los campos; la contraseña debe tener al menos 8 caracteres.";
+        } elseif ($m->getByEmail($correo)) {
+            $data["error"] = "El correo ya está registrado.";
+        } elseif ($m->existeNombreCompleto($nombre, $apellidos)) {
+            $data["error"] = "Ya existe una cuenta con ese nombre y apellido.";
         } else {
-            $this->redirect('/registro/index');
+            try {
+                $m->create([
+                    "nombre" => $nombre,
+                    "apellidos" => $apellidos,
+                    "correo" => $correo,
+                    "password_hash" => password_hash($password, PASSWORD_DEFAULT),
+                    "institucion_id" => $inst,
+                    "carrera_id" => $carrera,
+                ]);
+                $this->redirect("/auth/index?exito=1");
+            } catch (Throwable $e) {
+                error_log($e);
+                $data["error"] = "No fue posible completar el registro.";
+            }
         }
+        $this->view("auth/registro", $data);
     }
 }

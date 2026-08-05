@@ -1,79 +1,64 @@
-<?php require_once 'app/views/layouts/header.php'; ?>
+<?php require __DIR__ . '/../layouts/header.php'; ?>
 
-<div class="login-wrapper">
-    <div class="glass-card login-card">
-        
-        <div class="auth-header">
-            <div class="logo-icon">📖</div>
-            <h2>Registro de Estudiante</h2>
-            <p class="subtitle">Únete a la economía circular académica más grande del país.</p>
-        </div>
+<section class="auth-shell">
+    <div class="card auth-card wide">
+        <h1>Crear cuenta</h1>
 
-        <?php if (isset($data['error'])): ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($data['error']) ?></div>
+        <?php if (!empty($data['error'])): ?>
+            <div class="alert error"><?= htmlspecialchars($data['error']) ?></div>
         <?php endif; ?>
 
-        <form action="<?= BASE_URL ?>/registro/registrar" method="POST">
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="nombre">Nombre</label>
-                    <input type="text" id="nombre" name="nombre" class="form-control" required placeholder="Daniel">
-                </div>
-                <div class="form-group">
-                    <label for="apellidos">Apellidos</label>
-                    <input type="text" id="apellidos" name="apellidos" class="form-control" required placeholder="Ocampo">
-                </div>
+        <form method="post" action="<?= BASE_URL ?>/registro/registrar">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars($data['csrf']) ?>">
+
+            <div class="form-grid">
+                <label>Nombre <input name="nombre" required></label>
+                <label>Apellidos <input name="apellidos" required></label>
             </div>
 
-            <div class="form-group">
-                <label for="email">Correo universitario</label>
-                <input type="email" id="email" name="email" class="form-control" required placeholder="tu.nombre@universidad.edu">
-            </div>
+            <label>
+                Correo electrónico
+                <input type="email" name="email" required>
+            </label>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="institucion_id">Universidad</label>
-                    <select name="institucion_id" id="institucion_id" class="form-control" required>
-                        <option value="">Seleccionar</option>
-                        <?php if (isset($data['instituciones'])): ?>
-                            <?php foreach ($data['instituciones'] as $inst): ?>
-                                <option value="<?= $inst['id'] ?>"><?= htmlspecialchars($inst['nombre']) ?></option>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+            <div class="form-grid">
+                <label>
+                    Institución
+                    <select name="institucion_id" required>
+                        <option value="">Selecciona</option>
+                        <?php foreach ($data['instituciones'] as $institucion): ?>
+                            <option value="<?= $institucion['id'] ?>">
+                                <?= htmlspecialchars($institucion['nombre']) ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
-                </div>
+                </label>
 
-                <div class="form-group">
-                    <label for="carrera_id">Carrera</label>
-                    <select name="carrera_id" id="carrera_id" class="form-control" required>
-                        <option value="">Seleccionar</option>
-                        <?php if (isset($data['carreras'])): ?>
-                            <?php foreach ($data['carreras'] as $carrera): ?>
-                                <option value="<?= $carrera['id'] ?>"><?= htmlspecialchars($carrera['nombre']) ?></option>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                <label>
+                    Carrera
+                    <select name="carrera_id" required>
+                        <option value="">Selecciona</option>
+                        <?php foreach ($data['carreras'] as $carrera): ?>
+                            <option value="<?= $carrera['id'] ?>">
+                                <?= htmlspecialchars($carrera['nombre']) ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
-                </div>
+                </label>
             </div>
 
-            <div class="form-group">
-                <label for="password">Contraseña</label>
-                <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••">
-            </div>
+            <label>
+                Contraseña (mínimo 8 caracteres)
+                <input type="password" name="password" minlength="8" required>
+            </label>
 
-            <button type="submit" class="btn btn-primary" id="btn-Crearcuenta">
-                Crear cuenta ➔
-            </button>
-
-            <div class="divider"></div>
-
-            <div class="auth-footer">
-                <p>¿Ya tienes una cuenta? <a href="<?= BASE_URL ?>/auth/index">Iniciar sesión</a></p>
-            </div>
+            <button class="btn primary">Crear cuenta</button>
         </form>
 
+        <p class="center">
+            <a href="<?= BASE_URL ?>/auth/index">Volver al inicio de sesión</a>
+        </p>
     </div>
-</div>
+</section>
 
-<?php require_once 'app/views/layouts/footer.php'; ?>
+<?php require __DIR__ . '/../layouts/footer.php'; ?>
