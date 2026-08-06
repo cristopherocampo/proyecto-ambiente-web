@@ -1,10 +1,12 @@
 <?php
 
-class IntercambioController extends Controller {
+class IntercambioController extends Controller
+{
     private $intercambioModel;
     private $solicitudModel;
 
-    public function __construct() {
+    public function __construct()
+    {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -17,11 +19,13 @@ class IntercambioController extends Controller {
         $this->solicitudModel = $this->model('Solicitud');
     }
 
-    public function index() {
+    public function index()
+    {
         $this->view('intercambios/index');
     }
 
-    public function apiList() {
+    public function apiList()
+    {
         header('Content-Type: application/json');
 
         $intercambios = $this->intercambioModel->getByUsuario(
@@ -31,7 +35,8 @@ class IntercambioController extends Controller {
         echo json_encode($intercambios);
     }
 
-    public function apiCompletar($id) {
+    public function apiCompletar($id)
+    {
         header('Content-Type: application/json');
 
         $intercambio = $this->intercambioModel->getById($id);
@@ -45,12 +50,12 @@ class IntercambioController extends Controller {
         }
 
         $esSolicitante =
-            (int)$intercambio['solicitante_id'] ===
-            (int)$_SESSION['user_id'];
+            (int) $intercambio['solicitante_id'] ===
+            (int) $_SESSION['user_id'];
 
         $esPropietario =
-            (int)$intercambio['propietario_id'] ===
-            (int)$_SESSION['user_id'];
+            (int) $intercambio['propietario_id'] ===
+            (int) $_SESSION['user_id'];
 
         if (!$esSolicitante && !$esPropietario) {
             echo json_encode([
@@ -60,7 +65,7 @@ class IntercambioController extends Controller {
             return;
         }
 
-        if ((int)$intercambio['estado_intercambio_id'] !== 1) {
+        if ((int) $intercambio['estado_intercambio_id'] !== 1) {
             echo json_encode([
                 'success' => false,
                 'message' => 'El intercambio ya fue procesado'
@@ -81,10 +86,21 @@ class IntercambioController extends Controller {
                 $intercambio['publicacion_id']
             );
 
+
+        $publicacionOfrecidaFinalizada = true;
+
+        if (!empty($intercambio['publicacion_ofrecida_id'])) {
+            $publicacionOfrecidaFinalizada =
+                $this->intercambioModel->finalizarPublicacion(
+                    $intercambio['publicacion_ofrecida_id']
+                );
+        }
+
         if (
             !$intercambioCompletado ||
             !$solicitudCompletada ||
-            !$publicacionFinalizada
+            !$publicacionFinalizada ||
+            !$publicacionOfrecidaFinalizada
         ) {
             echo json_encode([
                 'success' => false,

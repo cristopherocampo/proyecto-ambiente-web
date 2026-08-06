@@ -8,6 +8,18 @@ $esPropietario =
 $estaDisponible =
     ($publicacion['estado_publicacion'] ?? '') === 'DISPONIBLE';
 
+$modalidadId =
+    (int) ($publicacion['modalidad_id'] ?? 0);
+
+$permiteTrueque =
+    in_array($modalidadId, [1, 3], true);
+
+$requiereTrueque =
+    $modalidadId === 1;
+
+$publicacionesDisponibles =
+    $data['publicacionesDisponibles'] ?? [];
+
 require __DIR__ . '/../layouts/header.php';
 ?>
 
@@ -38,14 +50,11 @@ require __DIR__ . '/../layouts/header.php';
         <div class="detail-cover">
             <?php if (!empty($publicacion['imagen'])): ?>
 
-                <img
-                    src="<?= BASE_URL . '/' . htmlspecialchars(
-                        $publicacion['imagen']
-                    ) ?>"
-                    alt="<?= htmlspecialchars(
-                        $publicacion['titulo']
-                    ) ?>"
-                >
+                <img src="<?= BASE_URL . '/' . htmlspecialchars(
+                    $publicacion['imagen']
+                ) ?>" alt="<?= htmlspecialchars(
+                     $publicacion['titulo']
+                 ) ?>">
 
             <?php else: ?>
 
@@ -146,34 +155,79 @@ require __DIR__ . '/../layouts/header.php';
                 Esta publicación es tuya; no puedes solicitarla.
             </div>
 
-            <a
-                class="btn primary wide-btn"
-                href="<?= BASE_URL ?>/publicaciones/editar/<?= (int) $publicacion['id'] ?>"
-            >
+            <a class="btn primary wide-btn" href="<?= BASE_URL ?>/publicaciones/editar/<?= (int) $publicacion['id'] ?>">
                 Editar publicación
             </a>
 
         <?php elseif ($estaDisponible): ?>
 
-            <form
-                method="post"
-                action="<?= BASE_URL ?>/publicaciones/solicitar/<?= (int) $publicacion['id'] ?>"
-            >
-                <input
-                    type="hidden"
-                    name="csrf"
-                    value="<?= htmlspecialchars(
-                        $data['csrf']
-                    ) ?>"
-                >
+            <?php if (
+                $requiereTrueque &&
+                empty($publicacionesDisponibles)
+            ): ?>
 
-                <button
-                    type="submit"
-                    class="btn primary wide-btn"
-                >
-                    Solicitar intercambio
-                </button>
-            </form>
+                <div class="alert info">
+                    Para solicitar este material por trueque,
+                    primero debes tener una publicación disponible.
+                </div>
+
+                <a class="btn secondary wide-btn" href="<?= BASE_URL ?>/publicaciones/crear">
+                    Publicar un material
+                </a>
+
+            <?php else: ?>
+
+                <form method="post" class="exchange-request-form" action="<?= BASE_URL ?>/publicaciones/solicitar/<?= (int) $publicacion['id'] ?>">
+                    <input type="hidden" name="csrf" value="<?= htmlspecialchars(
+                        $data['csrf']
+                    ) ?>">
+
+                    <?php if ($permiteTrueque): ?>
+
+                        <label>
+                            Material que ofreces
+
+                            <select name="publicacion_ofrecida_id" <?= $requiereTrueque
+                                ? 'required'
+                                : '' ?>>
+                                <option value="">
+                                    <?= $requiereTrueque
+                                        ? 'Selecciona un material'
+                                        : 'Sin material ofrecido' ?>
+                                </option>
+
+                                <?php foreach (
+                                    $publicacionesDisponibles
+                                    as $ofrecida
+                                ): ?>
+
+                                    <option value="<?= (int) $ofrecida['id'] ?>">
+                                        <?= htmlspecialchars(
+                                            $ofrecida['titulo']
+                                        ) ?>
+
+                                        <?php if (
+                                            !empty($ofrecida['autor'])
+                                        ): ?>
+                                            —
+                                            <?= htmlspecialchars(
+                                                $ofrecida['autor']
+                                            ) ?>
+                                        <?php endif; ?>
+                                    </option>
+
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+
+                    <?php endif; ?>
+
+                    <button type="submit" class="btn primary wide-btn">
+                        Solicitar intercambio
+                    </button>
+                </form>
+
+            <?php endif; ?>
 
         <?php else: ?>
 
@@ -218,22 +272,12 @@ require __DIR__ . '/../layouts/header.php';
 
         <?php if (!$esPropietario): ?>
 
-            <form
-                method="post"
-                action="<?= BASE_URL ?>/deseo/agregar/<?= (int) $publicacion['id'] ?>"
-            >
-                <input
-                    type="hidden"
-                    name="csrf"
-                    value="<?= htmlspecialchars(
-                        $data['csrf']
-                    ) ?>"
-                >
+            <form method="post" class="wishlist-form" action="<?= BASE_URL ?>/deseo/agregar/<?= (int) $publicacion['id'] ?>">
+                <input type="hidden" name="csrf" value="<?= htmlspecialchars(
+                    $data['csrf']
+                ) ?>">
 
-                <button
-                    type="submit"
-                    class="btn secondary wide-btn"
-                >
+                <button type="submit" class="btn secondary wide-btn">
                     ♡ Agregar a lista de deseos
                 </button>
             </form>

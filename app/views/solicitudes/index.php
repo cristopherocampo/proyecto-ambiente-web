@@ -8,19 +8,11 @@
 </div>
 
 <div class="solicitudes-tabs">
-    <button
-        type="button"
-        class="btn btn-primary"
-        id="btnEnviadas"
-    >
+    <button type="button" class="btn btn-primary" id="btnEnviadas">
         Solicitudes enviadas
     </button>
 
-    <button
-        type="button"
-        class="btn btn-secondary"
-        id="btnRecibidas"
-    >
+    <button type="button" class="btn btn-secondary" id="btnRecibidas">
         Solicitudes recibidas
     </button>
 </div>
@@ -38,6 +30,7 @@
                 <thead>
                     <tr>
                         <th>Material</th>
+                        <th>Material ofrecido</th>
                         <th>Propietario</th>
                         <th>Mensaje</th>
                         <th>Estado</th>
@@ -53,10 +46,7 @@
     </div>
 </div>
 
-<div
-    id="seccionRecibidas"
-    class="solicitudes-seccion hidden"
->
+<div id="seccionRecibidas" class="solicitudes-seccion hidden">
     <div class="glass-card">
         <h3>Solicitudes recibidas</h3>
 
@@ -69,6 +59,7 @@
                 <thead>
                     <tr>
                         <th>Material</th>
+                        <th>Material ofrecido</th>
                         <th>Solicitante</th>
                         <th>Mensaje</th>
                         <th>Estado</th>
@@ -89,40 +80,24 @@
         <div class="modal-header">
             <h3>Rechazar solicitud</h3>
 
-            <button
-                type="button"
-                class="modal-close"
-                id="closeRechazoModal"
-            >
+            <button type="button" class="modal-close" id="closeRechazoModal">
                 &times;
             </button>
         </div>
 
         <form id="rechazoForm">
-            <input
-                type="hidden"
-                id="solicitudRechazoId"
-            >
+            <input type="hidden" id="solicitudRechazoId">
 
             <div class="form-group">
                 <label for="motivoRechazo">
                     Motivo del rechazo
                 </label>
 
-                <textarea
-                    id="motivoRechazo"
-                    class="form-control"
-                    rows="4"
-                    required
-                    placeholder="Escribí el motivo del rechazo"
-                ></textarea>
+                <textarea id="motivoRechazo" class="form-control" rows="4" required
+                    placeholder="Escribí el motivo del rechazo"></textarea>
             </div>
 
-            <button
-                type="submit"
-                class="btn btn-danger btn-block"
-                id="btnConfirmarRechazo"
-            >
+            <button type="submit" class="btn btn-danger btn-block" id="btnConfirmarRechazo">
                 Rechazar solicitud
             </button>
         </form>
