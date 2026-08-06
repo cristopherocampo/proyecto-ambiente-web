@@ -142,8 +142,8 @@ class PublicacionesController extends Controller
             $this->flash(
                 "success",
                 $id
-                    ? "Publicación actualizada."
-                    : "Publicación creada."
+                ? "Publicación actualizada."
+                : "Publicación creada."
             );
 
             $this->redirect(
@@ -184,8 +184,29 @@ class PublicacionesController extends Controller
             exit("Publicación no encontrada.");
         }
 
+        $publicacionesDisponibles = [];
+
+        if (
+            (int) $p["propietario_id"] !==
+            (int) $_SESSION["user_id"]
+            &&
+            in_array(
+                (int) $p["modalidad_id"],
+                [1, 3],
+                true
+            )
+        ) {
+            $publicacionesDisponibles =
+                $this->model("Solicitud")
+                    ->getPublicacionesDisponiblesUsuario(
+                        (int) $_SESSION["user_id"]
+                    );
+        }
+
         $this->view("publicaciones/detalle", [
             "publicacion" => $p,
+            "publicacionesDisponibles" =>
+                $publicacionesDisponibles,
             "csrf" => $this->csrfToken(),
             "flash" => $_SESSION["flash"] ?? null,
         ]);
@@ -254,8 +275,8 @@ class PublicacionesController extends Controller
         $this->flash(
             $ok ? "success" : "error",
             $ok
-                ? "Publicación eliminada."
-                : "No puedes eliminar esa publicación."
+            ? "Publicación eliminada."
+            : "No puedes eliminar esa publicación."
         );
 
         $this->redirect(
@@ -273,6 +294,10 @@ class PublicacionesController extends Controller
 
         $publicacionId = (int) $id;
         $usuarioId = (int) $_SESSION["user_id"];
+
+        $publicacionOfrecidaId = (int) (
+            $_POST["publicacion_ofrecida_id"] ?? 0
+        );
 
         $solicitudModel = $this->model("Solicitud");
 
@@ -317,6 +342,48 @@ class PublicacionesController extends Controller
             );
         }
 
+
+        $modalidadId = (int) $publicacion["modalidad_id"];
+
+        if (!in_array($modalidadId, [1, 3], true)) {
+            $publicacionOfrecidaId = 0;
+        }
+
+        if (
+            $modalidadId === 1 &&
+            $publicacionOfrecidaId <= 0
+        ) {
+            $this->flash(
+                "error",
+                "Debes seleccionar un material para ofrecer."
+            );
+
+            $this->redirect(
+                "/publicaciones/detalle/" .
+                $publicacionId
+            );
+        }
+
+        if (
+            $publicacionOfrecidaId > 0 &&
+            !$solicitudModel->validarPublicacionOfrecida(
+                $publicacionOfrecidaId,
+                $usuarioId
+            )
+        ) {
+            $this->flash(
+                "error",
+                "El material ofrecido no es válido o no está disponible."
+            );
+
+            $this->redirect(
+                "/publicaciones/detalle/" .
+                $publicacionId
+            );
+        }
+
+
+
         $existePendiente =
             $solicitudModel->existePendiente(
                 $publicacionId,
@@ -335,6 +402,8 @@ class PublicacionesController extends Controller
         try {
             $solicitudId = $solicitudModel->create([
                 "publicacion_id" => $publicacionId,
+                "publicacion_ofrecida_id" =>
+                    $publicacionOfrecidaId,
                 "solicitante_id" => $usuarioId,
                 "mensaje" => "Me interesa este material."
             ]);

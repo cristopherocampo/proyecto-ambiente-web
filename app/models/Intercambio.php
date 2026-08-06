@@ -1,14 +1,17 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
 
-class Intercambio {
+class Intercambio
+{
     private $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = Database::getInstance()->getConnection();
     }
 
-    public function getBySolicitud($solicitud_id) {
+    public function getBySolicitud($solicitud_id)
+    {
         $query = "SELECT *
                   FROM intercambios
                   WHERE solicitud_id = ?";
@@ -22,7 +25,8 @@ class Intercambio {
         return $result->fetch_assoc();
     }
 
-    public function create($solicitud_id) {
+    public function create($solicitud_id)
+    {
         $codigo_entrega = strtoupper(
             substr(
                 md5(uniqid('', true)),
@@ -55,7 +59,8 @@ class Intercambio {
         return false;
     }
 
-    public function getByUsuario($usuario_id) {
+    public function getByUsuario($usuario_id)
+    {
         $query = "SELECT
                     intercambios.*,
                     intercambios.fecha_acordada AS fecha_inicio,
@@ -139,11 +144,19 @@ class Intercambio {
         return $intercambios;
     }
 
-    public function getById($id) {
+    public function getById($id)
+    {
         $query = "SELECT
                     intercambios.*,
                     intercambios.fecha_acordada AS fecha_inicio,
                     solicitudes.publicacion_solicitada_id AS publicacion_id,
+                    (
+                        SELECT solicitud_ofertas.publicacion_ofrecida_id
+                        FROM solicitud_ofertas
+                        WHERE solicitud_ofertas.solicitud_id =
+                              solicitudes.id
+                        LIMIT 1
+                    ) AS publicacion_ofrecida_id,
                     solicitudes.solicitante_id,
                     publicaciones.propietario_id,
                     obras.titulo
@@ -166,7 +179,8 @@ class Intercambio {
         return $result->fetch_assoc();
     }
 
-    public function completar($id) {
+    public function completar($id)
+    {
         $query = "UPDATE intercambios
                   SET estado_intercambio_id = 4,
                       fecha_finalizacion = NOW()
@@ -179,7 +193,8 @@ class Intercambio {
         return $stmt->execute();
     }
 
-    public function completarSolicitud($solicitud_id) {
+    public function completarSolicitud($solicitud_id)
+    {
         $query = "UPDATE solicitudes
                   SET estado_solicitud_id = 6,
                       fecha_respuesta = NOW()
@@ -191,7 +206,8 @@ class Intercambio {
         return $stmt->execute();
     }
 
-    public function finalizarPublicacion($publicacion_id) {
+    public function finalizarPublicacion($publicacion_id)
+    {
         $query = "UPDATE publicaciones
                   SET estado_publicacion_id = 4
                   WHERE id = ?";

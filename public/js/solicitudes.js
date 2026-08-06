@@ -112,7 +112,7 @@ async function loadEnviadas() {
         if (solicitudes.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="text-center text-muted">
+                    <td colspan="7" class="text-center text-muted">
                         No hay solicitudes enviadas.
                     </td>
                 </tr>
@@ -141,6 +141,12 @@ async function loadEnviadas() {
                         <small>
                             ${solicitud.autor ? solicitud.autor : 'Autor no indicado'}
                         </small>
+                    </td>
+
+                    <td>
+                        ${solicitud.material_ofrecido
+                        ? solicitud.material_ofrecido
+                        : 'Sin material ofrecido'}
                     </td>
 
                     <td>
@@ -198,7 +204,7 @@ async function loadRecibidas() {
         if (solicitudes.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="text-center text-muted">
+                    <td colspan="7" class="text-center text-muted">
                         No hay solicitudes recibidas.
                     </td>
                 </tr>
@@ -234,6 +240,12 @@ async function loadRecibidas() {
                         <small>
                             ${solicitud.autor ? solicitud.autor : 'Autor no indicado'}
                         </small>
+                    </td>
+
+                    <td>
+                        ${solicitud.material_ofrecido
+                        ? solicitud.material_ofrecido
+                        : 'Sin material ofrecido'}
                     </td>
 
                     <td>
