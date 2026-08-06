@@ -67,6 +67,13 @@ $userName = $_SESSION['user_nombre']
             </a>
 
             <a
+                class="<?= $currentController === 'deseo' ? 'active' : '' ?>"
+                href="<?= BASE_URL ?>/deseo/index"
+            >
+                ♡ <span>Lista de deseos</span>
+            </a>
+
+            <a
                 class="<?= $currentController === 'solicitud' ? 'active' : '' ?>"
                 href="<?= BASE_URL ?>/solicitud/index"
             >

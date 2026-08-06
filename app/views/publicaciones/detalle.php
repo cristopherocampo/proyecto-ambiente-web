@@ -216,6 +216,30 @@ require __DIR__ . '/../layouts/header.php';
 
         <?php endif; ?>
 
+        <?php if (!$esPropietario): ?>
+
+            <form
+                method="post"
+                action="<?= BASE_URL ?>/deseo/agregar/<?= (int) $publicacion['id'] ?>"
+            >
+                <input
+                    type="hidden"
+                    name="csrf"
+                    value="<?= htmlspecialchars(
+                        $data['csrf']
+                    ) ?>"
+                >
+
+                <button
+                    type="submit"
+                    class="btn secondary wide-btn"
+                >
+                    ♡ Agregar a lista de deseos
+                </button>
+            </form>
+
+        <?php endif; ?>
+
         <div class="owner-card">
 
             <span class="avatar">
