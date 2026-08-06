@@ -36,7 +36,11 @@ async function loadIntercambios() {
 
                 let acciones = '';
 
-                if (parseInt(intercambio.estado_intercambio_id) === 1) {
+                if (
+                    parseInt(
+                        intercambio.estado_intercambio_id
+                    ) === 1
+                ) {
                     acciones = `
                         <button
                             class="btn btn-primary btn-sm"
@@ -45,6 +49,33 @@ async function loadIntercambios() {
                             Completar
                         </button>
                     `;
+                }
+
+                if (
+                    parseInt(
+                        intercambio.estado_intercambio_id
+                    ) === 4
+                ) {
+                    if (
+                        parseInt(
+                            intercambio.ya_valorado
+                        ) === 1
+                    ) {
+                        acciones = `
+                            <span class="text-muted">
+                                Valorado
+                            </span>
+                        `;
+                    } else {
+                        acciones = `
+                            <a
+                                class="btn btn-secondary btn-sm"
+                                href="${BASE_URL}/valoracion/crear/${intercambio.id}"
+                            >
+                                Valorar
+                            </a>
+                        `;
+                    }
                 }
 
                 const fechaFinalizacion =

@@ -60,6 +60,16 @@ class Intercambio {
                     intercambios.*,
                     intercambios.fecha_acordada AS fecha_inicio,
                     estados_intercambio.nombre AS estado,
+                    CASE
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM valoraciones
+                            WHERE valoraciones.intercambio_id = intercambios.id
+                            AND valoraciones.autor_id = ?
+                        )
+                        THEN 1
+                        ELSE 0
+                    END AS ya_valorado,
                     solicitudes.publicacion_solicitada_id AS publicacion_id,
                     solicitudes.solicitante_id,
                     publicaciones.propietario_id,
@@ -109,7 +119,8 @@ class Intercambio {
         $stmt = $this->db->prepare($query);
 
         $stmt->bind_param(
-            "ii",
+            "iii",
+            $usuario_id,
             $usuario_id,
             $usuario_id
         );
