@@ -512,3 +512,9 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+
+
+.wishlist-form + .exchange-request-form {
+    margin-top: 18px;
+}

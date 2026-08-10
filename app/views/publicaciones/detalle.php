@@ -282,6 +282,43 @@ require __DIR__ . '/../layouts/header.php';
                 </button>
             </form>
 
+            <form
+                method="post"
+                class="exchange-request-form"
+                action="<?= BASE_URL ?>/reporte/guardar/<?= (int) $publicacion['id'] ?>"
+            >
+                <input
+                    type="hidden"
+                    name="csrf"
+                    value="<?= htmlspecialchars($data['csrf']) ?>"
+                >
+
+                <label>
+                    Motivo del reporte
+
+                    <input
+                        type="text"
+                        name="motivo"
+                        maxlength="120"
+                        required
+                    >
+                </label>
+
+                <label>
+                    Detalle
+
+                    <textarea
+                        name="detalle"
+                        maxlength="1000"
+                        rows="3"
+                    ></textarea>
+                </label>
+
+                <button type="submit" class="btn secondary wide-btn">
+                    Reportar publicación
+                </button>
+            </form>
+
         <?php endif; ?>
 
         <div class="owner-card">
