@@ -4,6 +4,7 @@ class IntercambioController extends Controller
 {
     private $intercambioModel;
     private $solicitudModel;
+    private $creditoModel;
 
     public function __construct()
     {
@@ -17,6 +18,7 @@ class IntercambioController extends Controller
 
         $this->intercambioModel = $this->model('Intercambio');
         $this->solicitudModel = $this->model('Solicitud');
+        $this->creditoModel = $this->model('Credito');
     }
 
     public function index()
@@ -73,6 +75,24 @@ class IntercambioController extends Controller
             return;
         }
 
+        $creditos = (float) (
+            $intercambio['creditos_ofrecidos'] ?? 0
+        );
+
+        if (
+            $creditos > 0 &&
+            !$this->creditoModel->tieneSaldo(
+                (int) $intercambio['solicitante_id'],
+                $creditos
+            )
+        ) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'El solicitante no tiene créditos suficientes'
+            ]);
+            return;
+        }
+
         $intercambioCompletado =
             $this->intercambioModel->completar($id);
 
@@ -85,7 +105,6 @@ class IntercambioController extends Controller
             $this->intercambioModel->finalizarPublicacion(
                 $intercambio['publicacion_id']
             );
-
 
         $publicacionOfrecidaFinalizada = true;
 
@@ -107,6 +126,34 @@ class IntercambioController extends Controller
                 'message' => 'Error al completar el intercambio'
             ]);
             return;
+        }
+
+        if ($creditos > 0) {
+            $debito =
+                $this->creditoModel->registrarMovimiento(
+                    (int) $intercambio['solicitante_id'],
+                    (int) $id,
+                    3,
+                    -$creditos,
+                    'Débito por intercambio'
+                );
+
+            $credito =
+                $this->creditoModel->registrarMovimiento(
+                    (int) $intercambio['propietario_id'],
+                    (int) $id,
+                    2,
+                    $creditos,
+                    'Crédito por intercambio'
+                );
+
+            if (!$debito || !$credito) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Error al registrar los créditos'
+                ]);
+                return;
+            }
         }
 
         $this->solicitudModel->createHistorial([

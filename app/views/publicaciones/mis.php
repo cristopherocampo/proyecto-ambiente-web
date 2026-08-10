@@ -16,7 +16,7 @@
 <?php endif; ?>
 
 <div class="table-wrap card">
-    <table>
+    <table class="table">
         <thead>
             <tr>
                 <th>Material</th>

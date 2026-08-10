@@ -131,6 +131,14 @@ $userName = $_SESSION['user_nombre']
 
             <div class="top-user">
 
+                <span class="credit-balance">
+                    <?= number_format(
+                        (float) ($data['saldo_creditos'] ?? 0),
+                        0
+                    ) ?>
+                    créditos
+                </span>
+
                 <span class="notification">♧</span>
 
                 <span class="avatar">

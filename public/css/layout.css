@@ -135,6 +135,18 @@
 .notification {
     color: #73817b;
 }
+
+.credit-balance {
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #edf7f3;
+    color: var(--prototype-green);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+
 .app-container {
     max-width: 1240px;
     padding: 30px 34px 50px;
