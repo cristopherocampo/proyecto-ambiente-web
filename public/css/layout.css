@@ -475,3 +475,40 @@
         width: 100%;
     }
 }
+
+
+
+.admin-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 35px;
+}
+
+.admin-stat {
+    padding: 22px;
+    text-align: center;
+}
+
+.admin-stat strong {
+    display: block;
+    font-size: 30px;
+    color: var(--prototype-green);
+    margin-bottom: 6px;
+}
+
+.admin-stat span {
+    color: #73817b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.admin-section {
+    margin-top: 35px;
+}
+
+@media (max-width: 800px) {
+    .admin-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
