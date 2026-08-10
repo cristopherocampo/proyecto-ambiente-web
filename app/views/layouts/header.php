@@ -89,6 +89,15 @@ $userName = $_SESSION['user_nombre']
 
             <span class="nav-label">CUENTA</span>
 
+            <?php if (!empty($_SESSION["es_admin"])): ?>
+                <a
+                    class="<?= $currentController === 'admin' ? 'active' : '' ?>"
+                    href="<?= BASE_URL ?>/admin/index"
+                >
+                    ⚙ <span>Administración</span>
+                </a>
+            <?php endif; ?>
+
             <a
                 class="<?= $currentController === 'perfil' ? 'active' : '' ?>"
                 href="<?= BASE_URL ?>/perfil/index"
@@ -151,7 +160,11 @@ $userName = $_SESSION['user_nombre']
 
                 <span>
                     <strong><?= htmlspecialchars($userName) ?></strong>
-                    <small>Estudiante</small>
+                    <small>
+                        <?= !empty($_SESSION["es_admin"])
+                            ? "Administrador"
+                            : "Estudiante" ?>
+                    </small>
                 </span>
 
             </div>

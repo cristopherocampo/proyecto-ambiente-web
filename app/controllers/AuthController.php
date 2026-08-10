@@ -31,6 +31,9 @@ class AuthController extends Controller
             session_regenerate_id(true);
             $_SESSION["user_id"] = (int) $user["id"];
             $_SESSION["user_nombre"] = $user["nombre"];
+            $_SESSION["es_admin"] = $this->model("Admin")->esAdministrador(
+                (int) $user["id"]
+            );
             $this->redirect("/catalogo/index");
         }
         $this->view("auth/login", [
