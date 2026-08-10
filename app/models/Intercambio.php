@@ -76,6 +76,8 @@ class Intercambio
                         ELSE 0
                     END AS ya_valorado,
                     solicitudes.publicacion_solicitada_id AS publicacion_id,
+                    solicitudes.modalidad_id,
+                    solicitudes.creditos_ofrecidos,
                     solicitudes.solicitante_id,
                     publicaciones.propietario_id,
                     obras.titulo,

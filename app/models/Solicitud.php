@@ -311,6 +311,10 @@ class Solicitud
         $this->db->begin_transaction();
 
         try {
+            $publicacion_ofrecida_id = (int) (
+                $data['publicacion_ofrecida_id'] ?? 0
+            );
+
             $query = "INSERT INTO solicitudes
                   (
                       publicacion_solicitada_id,
@@ -326,7 +330,13 @@ class Solicitud
                       publicaciones.modalidad_id,
                       1,
                       CASE
-                          WHEN publicaciones.modalidad_id IN (2, 3)
+                          WHEN publicaciones.modalidad_id = 2
+                              THEN COALESCE(
+                                  publicaciones.valor_creditos,
+                                  0
+                              )
+                          WHEN publicaciones.modalidad_id = 3
+                              AND ? = 0
                               THEN COALESCE(
                                   publicaciones.valor_creditos,
                                   0
@@ -340,8 +350,9 @@ class Solicitud
             $stmt = $this->db->prepare($query);
 
             $stmt->bind_param(
-                "isi",
+                "iisi",
                 $data['solicitante_id'],
+                $publicacion_ofrecida_id,
                 $data['mensaje'],
                 $data['publicacion_id']
             );
@@ -354,10 +365,6 @@ class Solicitud
             }
 
             $solicitud_id = $this->db->insert_id;
-
-            $publicacion_ofrecida_id = (int) (
-                $data['publicacion_ofrecida_id'] ?? 0
-            );
 
             if ($publicacion_ofrecida_id > 0) {
                 $query = "INSERT INTO solicitud_ofertas

@@ -14,6 +14,14 @@ class Controller
     }
     protected function view(string $view, array $data = []): void
     {
+        if (!empty($_SESSION["user_id"])) {
+            $creditoModel = $this->model("Credito");
+
+            $data["saldo_creditos"] = $creditoModel->getSaldo(
+                (int) $_SESSION["user_id"]
+            );
+        }
+
         $file = __DIR__ . "/../views/" . $view . ".php";
         if (!file_exists($file)) {
             http_response_code(404);

@@ -526,6 +526,16 @@ select.form-control option {
     white-space: nowrap;
 }
 
+.table td.actions a {
+    margin-right: 12px;
+}
+
+.table td.actions form {
+    display: inline;
+}
+
+
+
 .table td.actions .btn {
     display: inline-flex;
     justify-content: center;

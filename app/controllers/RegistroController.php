@@ -51,6 +51,21 @@ class RegistroController extends Controller
                     "institucion_id" => $inst,
                     "carrera_id" => $carrera,
                 ]);
+
+                $usuario = $m->getByEmail($correo);
+
+                if ($usuario) {
+                    $creditoModel = $this->model("Credito");
+
+                    $creditoModel->registrarMovimiento(
+                        (int) $usuario["id"],
+                        null,
+                        1,
+                        100,
+                        "Bonificación inicial"
+                    );
+                }
+
                 $this->redirect("/auth/index?exito=1");
             } catch (Throwable $e) {
                 error_log($e);
