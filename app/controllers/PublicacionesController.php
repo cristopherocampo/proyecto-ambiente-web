@@ -349,6 +349,38 @@ class PublicacionesController extends Controller
             $publicacionOfrecidaId = 0;
         }
 
+        $usaCreditos =
+    $modalidadId === 2 ||
+    (
+        $modalidadId === 3 &&
+        $publicacionOfrecidaId <= 0
+    );
+
+if ($usaCreditos) {
+    $creditos = (float) (
+        $publicacion["valor_creditos"] ?? 0
+    );
+
+    $creditoModel = $this->model("Credito");
+
+    if (
+        !$creditoModel->tieneSaldo(
+            $usuarioId,
+            $creditos
+        )
+    ) {
+        $this->flash(
+            "error",
+            "No tienes créditos suficientes para solicitar este material."
+        );
+
+        $this->redirect(
+            "/publicaciones/detalle/" .
+            $publicacionId
+        );
+    }
+}
+
         if (
             $modalidadId === 1 &&
             $publicacionOfrecidaId <= 0
