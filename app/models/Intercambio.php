@@ -152,6 +152,8 @@ class Intercambio
                     intercambios.*,
                     intercambios.fecha_acordada AS fecha_inicio,
                     solicitudes.publicacion_solicitada_id AS publicacion_id,
+                    solicitudes.modalidad_id,
+                    solicitudes.creditos_ofrecidos,
                     (
                         SELECT solicitud_ofertas.publicacion_ofrecida_id
                         FROM solicitud_ofertas
